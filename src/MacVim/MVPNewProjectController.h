@@ -18,7 +18,7 @@
 	MMWindowController *windowController;
 }
 @property(nonatomic, retain) MMWindowController *windowController;
-
+- (void)showNewProjectWindow;
 - (IBAction)createProject:(id)sender;
 - (IBAction)cancel:(id)sender;
 - (IBAction)chooseRoot:(id)sender;

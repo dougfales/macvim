@@ -1758,8 +1758,7 @@
         newProjectController = [[[MVPNewProjectController alloc] init] retain];
         newProjectController.windowController = self;
     }
-    [newProjectController showWindow:self];
-    [newProjectController.window makeKeyAndOrderFront:self];
+    [newProjectController showNewProjectWindow];
 }
 
 

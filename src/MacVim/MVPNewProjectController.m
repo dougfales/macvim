@@ -33,6 +33,12 @@
 	[super dealloc];
 }
 
+- (void)showNewProjectWindow {
+    [self.window center];
+    [self showWindow:nil];
+    [self.window makeKeyAndOrderFront:self];
+}
+
 - (IBAction)createProject:(id)sender {
 	MVPProject *project = [[MVPProject alloc] initWithRoot:[self selectedRoot] andName:[self selectedName] andIgnorePatterns:[self selectedIgnorePatterns]];
 	[self.windowController setProject:project];
