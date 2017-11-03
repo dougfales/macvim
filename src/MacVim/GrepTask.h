@@ -13,7 +13,8 @@
 @protocol GrepTaskController
 - (void)appendResults:(SearchResultDataSource *)results;
 - (void)grepStarted;
-- (void)grepFinished:(SearchResultDataSource *)results;;
+- (void)grepFinished:(SearchResultDataSource *)results;
+- (NSString *)searchToolPath;
 @end
 
 @interface GrepTask : NSObject {

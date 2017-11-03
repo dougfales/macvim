@@ -61,7 +61,7 @@
 	NSRect fromRect = NSMakeRect(0, 0, [icon size].width, [icon size].height);
 	NSImageInterpolation interp = [[NSGraphicsContext currentContext] imageInterpolation];
 	[[NSGraphicsContext currentContext] setImageInterpolation:NSImageInterpolationHigh];
-	[icon drawInRect:toRect fromRect:fromRect operation:NSCompositeSourceOver fraction:1.0];
+	[icon drawInRect:toRect fromRect:fromRect operation:NSCompositingOperationSourceOver fraction:1.0];
 	
 	[[NSGraphicsContext currentContext] setImageInterpolation:interp];
 	[[NSGraphicsContext currentContext] restoreGraphicsState];

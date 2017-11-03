@@ -131,7 +131,7 @@
 {
 
 	if([resultString characterAtIndex:[resultString length]-1] != '\n') {
-		NSLog(@"resultString size: %d and last char is %c", [resultString length], [resultString characterAtIndex:[resultString length] - 1]);
+		NSLog(@"resultString size: %ld and last char is %c", [resultString length], [resultString characterAtIndex:[resultString length] - 1]);
 	}
     
     if([resultString hasPrefix:@"Binary file "]){
