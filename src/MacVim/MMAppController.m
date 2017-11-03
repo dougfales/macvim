@@ -43,6 +43,7 @@
 #import "MMWindowController.h"
 #import "MMTextView.h"
 #import "Miscellaneous.h"
+#import "MVPProject.h"
 #import <unistd.h>
 #import <CoreServices/CoreServices.h>
 // Need Carbon for TIS...() functions
@@ -102,7 +103,6 @@ typedef struct
 
 
 @interface MMAppController (Private)
-- (MMVimController *)topmostVimController;
 - (int)launchVimProcessWithArguments:(NSArray *)args
                     workingDirectory:(NSString *)cwd;
 - (NSArray *)filterFilesAndNotify:(NSArray *)files;
@@ -1072,6 +1072,41 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     return openOk;
 }
 
+- (MMVimController *)topmostVimController
+{
+    // Find the topmost visible window which has an associated vim controller
+    // as follows:
+    //
+    // 1. Search through ordered windows as determined by NSApp.  Unfortunately
+    //    this method can fail, e.g. if a full-screen window is on another
+    //    "Space" (in this case NSApp returns no windows at all), so we have to
+    //    fall back on ...
+    // 2. Search through all Vim controllers and return the first visible
+    //    window.
+    
+    NSEnumerator *e = [[NSApp orderedWindows] objectEnumerator];
+    id window;
+    while ((window = [e nextObject]) && [window isVisible]) {
+        unsigned i, count = [vimControllers count];
+        for (i = 0; i < count; ++i) {
+            MMVimController *vc = [vimControllers objectAtIndex:i];
+            if ([[[vc windowController] window] isEqual:window])
+                return vc;
+        }
+    }
+    
+    unsigned i, count = [vimControllers count];
+    for (i = 0; i < count; ++i) {
+        MMVimController *vc = [vimControllers objectAtIndex:i];
+        if ([[[vc windowController] window] isVisible]) {
+            return vc;
+        }
+    }
+    
+    return nil;
+}
+
+
 - (IBAction)newWindow:(id)sender
 {
     ASLogDebug(@"Open new window");
@@ -1492,40 +1527,6 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 
 
 @implementation MMAppController (Private)
-
-- (MMVimController *)topmostVimController
-{
-    // Find the topmost visible window which has an associated vim controller
-    // as follows:
-    //
-    // 1. Search through ordered windows as determined by NSApp.  Unfortunately
-    //    this method can fail, e.g. if a full-screen window is on another
-    //    "Space" (in this case NSApp returns no windows at all), so we have to
-    //    fall back on ...
-    // 2. Search through all Vim controllers and return the first visible
-    //    window.
-
-    NSEnumerator *e = [[NSApp orderedWindows] objectEnumerator];
-    id window;
-    while ((window = [e nextObject]) && [window isVisible]) {
-        unsigned i, count = [vimControllers count];
-        for (i = 0; i < count; ++i) {
-            MMVimController *vc = [vimControllers objectAtIndex:i];
-            if ([[[vc windowController] window] isEqual:window])
-                return vc;
-        }
-    }
-
-    unsigned i, count = [vimControllers count];
-    for (i = 0; i < count; ++i) {
-        MMVimController *vc = [vimControllers objectAtIndex:i];
-        if ([[[vc windowController] window] isVisible]) {
-            return vc;
-        }
-    }
-
-    return nil;
-}
 
 - (int)launchVimProcessWithArguments:(NSArray *)args
                     workingDirectory:(NSString *)cwd
