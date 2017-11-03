@@ -634,8 +634,10 @@
                     [fullScreenWindow centerView];
                 }
             } else {
-  //              [self resizeWindowToFitContentSize:contentSize
-   //                                   keepOnScreen:keepOnScreen];
+//                  TODO: Re-enable this when I've figured out how to make it observe the size of the tree view inside the NSSplitView.
+//                  Right now, it causes a weird looping resize/dedraw that prevents you from seeing the tree view.
+//                  [self resizeWindowToFitContentSize:contentSize
+//                                   keepOnScreen:keepOnScreen];
             }
         }
 
