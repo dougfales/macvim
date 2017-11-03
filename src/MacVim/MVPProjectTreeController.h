@@ -1,5 +1,5 @@
 //
-//  ProjectDrawerController.h
+//  MVPProjectTreeController.h
 //  MacVim
 //
 //  Created by Doug Fales on 3/4/10.
@@ -16,7 +16,6 @@
 @interface MVPProjectTreeController : NSViewController <NSOutlineViewDelegate, NSOutlineViewDataSource, NSMenuDelegate, NSSplitViewDelegate> {
 	IBOutlet NSOutlineView *projectOutlineView;
 	IBOutlet NSScrollView *scrollView;
-	NSSplitView *projectDrawer;
 	NSImage *folderImage;
 	MVPProject *project;
 	MVPDirEntry *rootEntry;
@@ -25,7 +24,6 @@
     FSEventStreamRef    fsEventStream;
 #endif
 }
-@property (nonatomic,retain) NSSplitView *projectDrawer;
 @property (nonatomic,retain) NSOutlineView *projectOutlineView;
 @property (nonatomic,retain) NSScrollView *scrollView;
 @property (nonatomic,retain) MVPProject *project;

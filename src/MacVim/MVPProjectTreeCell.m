@@ -1,7 +1,7 @@
 
-#import "MVPProjectDrawerCell.h"
+#import "MVPProjectTreeCell.h"
 
-@implementation MVPProjectDrawerCell
+@implementation MVPProjectTreeCell
 
 #define kImageSize		16.0
 
@@ -26,7 +26,7 @@
 
 
 - (id)copyWithZone:(NSZone*)zone{
-    MVPProjectDrawerCell *cell = (MVPProjectDrawerCell*)[super copyWithZone:zone];
+    MVPProjectTreeCell *cell = (MVPProjectTreeCell*)[super copyWithZone:zone];
     cell->image = [image retain];
     return cell;
 }

@@ -1,5 +1,5 @@
 //
-//  ProjectDrawerController.m
+//  MVPProjectTreeController.m
 //  MacVim
 //
 //  Created by Doug Fales on 3/4/10.
@@ -7,7 +7,7 @@
 //
 
 #import "MVPProjectTreeController.h"
-#import "MVPProjectDrawerCell.h"
+#import "MVPProjectTreeCell.h"
 #import "MMAppController.h"
 #import "MMVimController.h"
 #import "MMWindowController.h"
@@ -34,7 +34,6 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 #endif
 
 @implementation MVPProjectTreeController
-@synthesize projectDrawer;
 @synthesize projectOutlineView;
 @synthesize scrollView;
 @synthesize project;
@@ -47,29 +46,10 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 }
 
 -(void)addToWindow:(NSSplitView *)splitView {
-//	NSSize contentSize = NSMakeSize(100, 100);
-/*
-    NSRect windowFrame = [[window contentView] bounds];
-    NSRect frame = NSMakeRect(0, 0, windowFrame.size.width/2, windowFrame.size.height);
-	projectDrawer = [[NSSplitView alloc] initWithFrame:frame];
-    [projectDrawer setVertical:YES];
-    [projectDrawer addSubview:self.view];
-    [projectDrawer adjustSubviews];
-    projectDrawer.delegate = self;
-    [[window contentView] addSubview:projectDrawer];
-  */
     if([splitView.subviews containsObject:self.view]) {
         return;
     }
-    
     [splitView insertArrangedSubview:self.view atIndex:0];
-    
-    /*
-    [projectDrawer setParentWindow:window];
-	[projectDrawer setMinContentSize:contentSize];	
-	[projectDrawer setMaxContentSize:NSMakeSize(400, 100)];	
-	[projectDrawer setContentView:self.view];
-     */
 }
 
 - (void)show {
@@ -91,7 +71,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 	
 	// apply our custom ImageAndTextCell for rendering the first column's cells
 	NSTableColumn *tableColumn = [projectOutlineView tableColumnWithIdentifier:COLUMNID_NAME];
-	MVPProjectDrawerCell *imageAndTextCell = [[[MVPProjectDrawerCell alloc] init] autorelease];
+	MVPProjectTreeCell *imageAndTextCell = [[[MVPProjectTreeCell alloc] init] autorelease];
 	[imageAndTextCell setEditable:YES];
 	[tableColumn setDataCell:imageAndTextCell];
     [projectOutlineView setTarget:self];
@@ -361,12 +341,12 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 	MVPDirEntry *dirEntry = (MVPDirEntry *)item;
 	if ([[tableColumn identifier] isEqualToString:COLUMNID_NAME]){
 		// we are displaying the single and only column
-		if ([cell isKindOfClass:[MVPProjectDrawerCell class]]){
+		if ([cell isKindOfClass:[MVPProjectTreeCell class]]){
 			if (dirEntry){
 				if ([dirEntry isLeaf]){
-					[(MVPProjectDrawerCell*)cell setImage:[[NSWorkspace sharedWorkspace] iconForFileType:[[dirEntry url] pathExtension]]];
+					[(MVPProjectTreeCell*)cell setImage:[[NSWorkspace sharedWorkspace] iconForFileType:[[dirEntry url] pathExtension]]];
 				} else {
-					[(MVPProjectDrawerCell*)cell setImage:folderImage];
+					[(MVPProjectTreeCell*)cell setImage:folderImage];
 				}
 			}
 		}

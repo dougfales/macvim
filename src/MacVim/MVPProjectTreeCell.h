@@ -1,6 +1,6 @@
 #import <Cocoa/Cocoa.h>
 
-@interface MVPProjectDrawerCell : NSTextFieldCell
+@interface MVPProjectTreeCell : NSTextFieldCell
 {
 @private
 	NSImage *image;
