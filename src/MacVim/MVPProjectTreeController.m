@@ -11,6 +11,7 @@
 #import "MMAppController.h"
 #import "MMVimController.h"
 #import "MMWindowController.h"
+#import "MMTextView.h"
 #import "MMTextViewHelper.h"
 #import "MVPProject.h"
 
@@ -45,7 +46,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     [self stopWatchingProjectForChanges];
 }
 
--(void)addToWindow:(NSSplitView *)splitView {
+-(void)addToSplitView:(NSSplitView *)splitView {
     if([splitView.subviews containsObject:self.view]) {
         return;
     }
@@ -95,7 +96,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 - (void)refreshPath:(NSString *)path
 {
     ASLogErr(@"path: %@", path);
-    MVPDirEntry * entry = [rootEntry refreshAtPath:path];
+    [rootEntry refreshAtPath:path];
     [projectOutlineView reloadData];
 }
 
@@ -193,11 +194,12 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 
 - (IBAction)viewLineOnGithub:(id)sender
 {
-   NSLog(@"N OWAYASDASDFASDFASFASDFAS asdfasdf asdfas asdf");
-    
-    MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
-    int range = [[[[[vc windowController] vimView] textView] helper] preEditRow];
-    NSLog(@"row is: %d", range);
+// TODO: Implement a way to go to a certain line or selection on GH!
+//    MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
+//    MMTextView * textView = (MMTextView *)[[[vc windowController] vimView] textView];
+//    Expose this on MMTextView somehow...
+//    int range = [[textView textViewHelper] preEditRow];
+//    NSLog(@"row is: %d", range);
 }
 
 - (IBAction)viewOnGithub:(id)sender
@@ -265,7 +267,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     NSString *path = [[clickedEntry url] path];
     
     NSAlert *alert = [[NSAlert alloc] init];
-    [alert setAlertStyle:NSWarningAlertStyle];
+    alert.alertStyle = NSAlertStyleWarning;
     [alert addButtonWithTitle:NSLocalizedString(@"Move to Trash", @"Dialog button")];
     [alert addButtonWithTitle:NSLocalizedString(@"Cancel", @"Dialog button")];
     [alert setMessageText:NSLocalizedString(@"Move item to trash?",

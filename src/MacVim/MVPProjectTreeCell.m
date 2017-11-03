@@ -89,31 +89,26 @@
 		return;
 	}
 	
-		// the cell has an image: draw the normal item cell
-		NSSize imageSize;
-        NSRect imageFrame;
-
-        imageSize = [image size];
-        NSDivideRect(cellFrame, &imageFrame, &cellFrame, 3 + imageSize.width, NSMinXEdge);
- 
-        imageFrame.origin.x += kImageOriginXOffset;
-		imageFrame.origin.y -= kImageOriginYOffset;
-        imageFrame.size = imageSize;
-		
-        if ([controlView isFlipped])
-            imageFrame.origin.y += ceil((cellFrame.size.height + imageFrame.size.height) / 2);
-        else
-            imageFrame.origin.y += ceil((cellFrame.size.height - imageFrame.size.height) / 2);
-		[image compositeToPoint:imageFrame.origin operation:NSCompositeSourceOver];
-
-		NSRect newFrame = cellFrame;
-		newFrame.origin.x += kTextOriginXOffset;
-		newFrame.origin.y += kTextOriginYOffset;
-		newFrame.size.height -= kTextHeightAdjust;
-		[super drawWithFrame:newFrame inView:controlView];
+    // the cell has an image: draw the normal item cell
+    NSSize imageSize;
+    NSRect imageFrame;
+    
+    imageSize = [image size];
+    NSDivideRect(cellFrame, &imageFrame, &cellFrame, 3 + imageSize.width, NSMinXEdge);
+    
+    imageFrame.origin.x += kImageOriginXOffset;
+    imageFrame.origin.y -= kImageOriginYOffset;
+    imageFrame.size = imageSize;
+    
+    imageFrame.origin.y += ceil((cellFrame.size.height - imageFrame.size.height) / 2);
+    
+    [image drawInRect:imageFrame fromRect:NSZeroRect operation:NSCompositingOperationSourceOver fraction:1.0 respectFlipped:[controlView isFlipped] hints:nil];
+    NSRect newFrame = cellFrame;
+    newFrame.origin.x += kTextOriginXOffset;
+    newFrame.origin.y += kTextOriginYOffset;
+    newFrame.size.height -= kTextHeightAdjust;
+    [super drawWithFrame:newFrame inView:controlView];
 }
-
-
 
 @end
 

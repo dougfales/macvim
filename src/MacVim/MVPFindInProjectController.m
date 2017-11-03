@@ -9,8 +9,10 @@
 #import "MVPFindInProjectController.h"
 #import "MMVimController.h"
 #import "MMAppController.h"
+#import "MMWindowController.h"
 #import "MVPProject.h"
 #import "SearchResultDataSource.h"
+#import "SearchResult.h"
 
 @interface MVPFindInProjectController()
     - (void)locateSearchTools;
@@ -65,7 +67,7 @@
 }
 
 - (void)outlineView:(NSOutlineView *)outlineView willDisplayCell:(NSTextField *)cell forTableColumn:(NSTableColumn *)tableColumn item:(SearchResult *)item {
-	[cell setAttributedStringValue:[item displayName]];
+    [cell setAttributedStringValue:[item displayName]];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldEditTableColumn:(NSTableColumn *)tableColumn item:(SearchResult *)item 
@@ -78,12 +80,12 @@
 	if([item lineNumber] >= 0) {
 		NSInteger startPoint = [item lineNumber] - 1;
 		startPoint = (startPoint < 0 ? 0 : startPoint);
-		cmd = [NSString stringWithFormat:@":tabedit +%d %@ | /%@<CR>", startPoint, filename, [item searchText]];
+		cmd = [NSString stringWithFormat:@":tabedit +%ld %@ | /%@<CR>", startPoint, filename, item.searchText];
 	} else {
-		cmd = [NSString stringWithFormat:@":tabedit %@ | /%@<CR>", filename, [item searchText]];
+		cmd = [NSString stringWithFormat:@":tabedit %@ | /%@<CR>", filename, item.searchText];
 	}
 	[vc addVimInput:cmd];
-	[[[vc windowController] window] makeKeyAndOrderFront:self];
+	[[vc windowController].window makeKeyAndOrderFront:self];
 	return NO;
 }
 

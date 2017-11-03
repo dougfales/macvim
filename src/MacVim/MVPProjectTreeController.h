@@ -30,7 +30,7 @@
 @property (nonatomic,retain) MVPDirEntry *rootEntry;
 @property (nonatomic,retain) MVPDirEntry *lastClickedEntry;
 
--(void)addToWindow:(MMWindow *)window;
+-(void)addToSplitView:(NSSplitView *)window;
 -(void)show;
 -(void)hide;
 - (void)toggle;

@@ -1355,6 +1355,101 @@
     [afterWindowPresentedQueue addObject:[block copy]];
 }
 
+
+- (void)setProject:(MVPProject *)newProject {
+    if(project != newProject) {
+        [project release];
+        project = newProject;
+        [project retain];
+    }
+    // Popup a sheet while it loads!
+    [project load];
+    [project save];
+    [projectTreeController setProject:project];
+    [self showDrawer:self];
+    [vimController addVimInput:[NSString stringWithFormat:@":cd %@<CR>", [project pathToRoot]]];
+}
+
+- (IBAction)fastFind:(id)sender {
+    if(fastFindController == nil && project != nil) {
+        fastFindController = [[[MVPFastFindController alloc] init] retain];
+        fastFindController.project = project;
+    }
+    [fastFindController show];
+    //[fastFindController.window makeKeyAndOrderFront:self];
+}
+
+- (IBAction)findInProject:(id)sender {
+    if(findInProjectController == nil && project != nil) {
+        findInProjectController = [[[MVPFindInProjectController alloc] init] retain];
+        findInProjectController.project = project;
+    }
+    [findInProjectController show];
+    //[fastFindController.window makeKeyAndOrderFront:self];
+}
+
+- (IBAction)openProjectAtPath:(NSString*)projectPath{
+    if (projectPath) {
+        MVPProject *project = [MVPProject loadFromDisk:projectPath];
+        [[NSDocumentController sharedDocumentController] noteNewRecentFilePath:projectPath];
+        [self showDrawer:self];
+        [self setProject:project];
+    }
+}
+
+- (IBAction)openProject:(id)sender {
+    NSArray *fileTypes = [NSArray arrayWithObject:@"mvp"];
+    NSOpenPanel *panel = [NSOpenPanel openPanel];
+    panel.floatingPanel = YES;
+    panel.canChooseDirectories = NO;
+    panel.canChooseFiles = YES;
+    panel.allowedFileTypes = fileTypes;
+    panel.directoryURL = [NSURL URLWithString:NSHomeDirectory()];
+    
+    [self showDrawer:self];
+    int result = [panel runModal];
+    if(result == NSModalResponseOK){
+        NSURL *url = [[panel URLs] objectAtIndex:0];
+        MVPProject *p = [MVPProject loadFromDisk:[url path]];
+        [self setProject:p];
+        [[NSDocumentController sharedDocumentController] noteNewRecentFilePath:[url path]];
+    }
+}
+
+- (IBAction)newProject:(id)sender {
+    if(newProjectController == nil) {
+        newProjectController = [[[MVPNewProjectController alloc] init] retain];
+        newProjectController.windowController = self;
+    }
+    [newProjectController showNewProjectWindow];
+}
+
+- (IBAction)showDrawer:(id)sender
+{
+    if(projectTreeController == nil) {
+        projectTreeController = [[MVPProjectTreeController alloc] initWithNibName:@"MVPProjectTree" bundle:nil];
+        [projectTreeController addToSplitView:verticalSplitView];
+    }
+    
+    [projectTreeController show];
+}
+
+- (IBAction)toggleDrawer:(id)sender
+{
+    if(projectTreeController == nil) {
+        projectTreeController = [[MVPProjectTreeController alloc] initWithNibName:@"MVPProjectTree" bundle:nil];
+        [projectTreeController addToSplitView:verticalSplitView];
+    }
+    [projectTreeController toggle];
+}
+
+- (IBAction)viewLineOnGithub:(id)sender
+{
+    if(projectTreeController) {
+        [projectTreeController viewLineOnGithub:self];
+    }
+}
+
 @end // MMWindowController
 
 
@@ -1711,98 +1806,6 @@
 + (NSString *)tabBarStyleForMetal
 {
     return shouldUseYosemiteTabBarStyle() ? @"Yosemite" : @"Metal";
-}
-
-- (void)setProject:(MVPProject *)newProject {
-    if(project != newProject) {
-        [project release];
-        project = newProject;
-        [project retain];
-    }
-    // Popup a sheet while it loads!
-    [project load];    
-    [project save];
-    [projectTreeController setProject:project];
-    [self showDrawer:self];
-    [vimController addVimInput:[NSString stringWithFormat:@":cd %@<CR>", [project pathToRoot]]];    
-}
-
-- (IBAction)fastFind:(id)sender {
-    if(fastFindController == nil && project != nil) {
-        fastFindController = [[[MVPFastFindController alloc] init] retain];
-        fastFindController.project = project;
-    }
-    [fastFindController show];
-    //[fastFindController.window makeKeyAndOrderFront:self];    
-}
-
-- (IBAction)findInProject:(id)sender {
-    if(findInProjectController == nil && project != nil) {
-        findInProjectController = [[[MVPFindInProjectController alloc] init] retain];
-        findInProjectController.project = project;
-    }
-    [findInProjectController show];
-    //[fastFindController.window makeKeyAndOrderFront:self];    
-}
-
-- (IBAction)openProjectAtPath:(NSString*)projectPath{
-	if (projectPath) {
-		MVPProject *project = [MVPProject loadFromDisk:projectPath];
-		[[NSDocumentController sharedDocumentController] noteNewRecentFilePath:projectPath];
-		[self showDrawer:self];
-		[self setProject:project];
-	}
-}
-
-- (IBAction)openProject:(id)sender {
-    NSArray *fileTypes = [NSArray arrayWithObject:@"mvp"];
-    NSOpenPanel *panel = [NSOpenPanel openPanel];        
-    [panel setFloatingPanel:YES];
-    [panel setCanChooseDirectories:NO];
-    [panel setCanChooseFiles:YES];
-    [self showDrawer:self];
-    int result = [panel runModalForDirectory:NSHomeDirectory() file:nil types:fileTypes];    
-    if(result == NSOKButton){
-        NSURL *url = [[panel URLs] objectAtIndex:0];		
-        MVPProject *p = [MVPProject loadFromDisk:[url path]];
-		[self setProject:p];
-		[[NSDocumentController sharedDocumentController] noteNewRecentFilePath:[url path]];
-    }
-}
-
-- (IBAction)newProject:(id)sender {
-    if(newProjectController == nil) {
-        newProjectController = [[[MVPNewProjectController alloc] init] retain];
-        newProjectController.windowController = self;
-    }
-    [newProjectController showNewProjectWindow];
-}
-
-
-- (IBAction)showDrawer:(id)sender
-{
-	if(projectTreeController == nil) {
-		projectTreeController = [[MVPProjectTreeController alloc] initWithNibName:@"MVPProjectTree" bundle:nil];
-		[projectTreeController addToWindow:verticalSplitView];
-	}
-    
-    [projectTreeController show];
-}
-
-- (IBAction)toggleDrawer:(id)sender
-{
-	if(projectTreeController == nil) {
-		projectTreeController = [[MVPProjectTreeController alloc] initWithNibName:@"MVPProjectTree" bundle:nil];
-		[projectTreeController addToWindow:verticalSplitView];
-	}
-    [projectTreeController toggle];
-}
-
-- (IBAction)viewLineOnGithub:(id)sender
-{
-    if(projectTreeController) {
-        [projectTreeController viewLineOnGithub:self];
-    }
 }
 
 @end // MMWindowController (Private)

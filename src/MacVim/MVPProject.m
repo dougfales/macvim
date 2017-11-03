@@ -174,8 +174,7 @@ static NSString *_pathToGit;
         repoPath = [repoPath substringToIndex:dotGit];
     }
     repoPath = [repoPath stringByAppendingFormat:@"/blob/%@/%@", [blob substringToIndex:7], [entry relativePath] ];
-    NSURL *url = [[NSURL alloc] initWithScheme:@"https" host:@"github.com" path:repoPath];
-    return url;
+    return [[NSURL alloc] initWithString:[NSString stringWithFormat:@"https://github.com%@", repoPath]];
 }
 
 #pragma mark Saving and Creating

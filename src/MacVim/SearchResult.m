@@ -43,7 +43,7 @@
 - (NSAttributedString *)displayName
 {
 	if([self.children count] == 0) {
-		NSString *fullString = [NSString stringWithFormat:@"\t%d: %@", self.lineNumber, self.matchLine];
+		NSString *fullString = [NSString stringWithFormat:@"\t%ld: %@", self.lineNumber, self.matchLine];
 		NSRange searchTextLocation = [fullString rangeOfString:self.searchText];
 		NSDictionary *matchLineAttributes = [NSDictionary dictionaryWithObjectsAndKeys:[NSColor grayColor], NSForegroundColorAttributeName, [NSFont systemFontOfSize:11], NSFontAttributeName, nil];
 		NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:fullString attributes:matchLineAttributes]; 
@@ -51,7 +51,7 @@
 		[str addAttribute:NSFontAttributeName value:[NSFont boldSystemFontOfSize:11] range:searchTextLocation];
 		return str;
 	} else {
-		return [NSString stringWithFormat:@"%@ -- %@", self.basename, self.name];
+        return [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@ -- %@", self.basename, self.name]];
 	}
 }
 
