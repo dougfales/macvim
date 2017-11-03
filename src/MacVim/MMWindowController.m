@@ -1706,7 +1706,8 @@
     // Popup a sheet while it loads!
     [project load];    
     [project save];
-    [projectDrawerController setProject:project];    
+    [projectDrawerController setProject:project];
+    [self showDrawer:self];
     [vimController addVimInput:[NSString stringWithFormat:@":cd %@<CR>", [project pathToRoot]]];    
 }
 

@@ -15,8 +15,8 @@
 	IBOutlet NSTextField *ignorePatternsTextField;
 	IBOutlet NSButton *createButton;
 	MMWindowController *windowController;
-    NSString *projectName;
 }
+@property(nonatomic, retain) NSString *projectName;
 @property(nonatomic, retain) MMWindowController *windowController;
 - (void)showNewProjectWindow;
 - (IBAction)createProject:(id)sender;

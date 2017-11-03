@@ -58,10 +58,10 @@
 	if(i == NSModalResponseOK){
 		NSURL *url = [[panel URLs] objectAtIndex:0];
 		[rootPathLabel setStringValue:[url path]];
-        projectName = [NSString stringWithFormat:@"%@", url.pathComponents.lastObject];
+        self.projectName = [NSString stringWithFormat:@"%@", url.pathComponents.lastObject];
         // Maybe we should hide these files with a . prefix?
         // projectName = [NSString stringWithFormat:@".%@", url.pathComponents.lastObject];
-        projectName = [projectName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        self.projectName = [_projectName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 	}
 	[self checkEnableCreateButton];    
 }
@@ -79,7 +79,7 @@
 }
 
 - (NSString *)selectedName {
-    return projectName;
+    return _projectName;
 }
 
 - (NSString *)selectedRoot {
