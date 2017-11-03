@@ -173,12 +173,26 @@
     // on whether the tabline separator is visible or not.
     NSView *contentView = [win contentView];
     [contentView setAutoresizesSubviews:YES];
-
+    
+//    NSRect windowFrame = [[win contentView] bounds];
+//    NSRect frame = NSMakeRect(0, 0, windowFrame.size.width/2, windowFrame.size.height);
+    verticalSplitView = [[NSSplitView alloc] initWithFrame:[[win contentView] bounds]];
+    [verticalSplitView setVertical:YES];
+    [verticalSplitView adjustSubviews];
+//    projectDrawer.delegate = self;
+    
+    
     vimView = [[MMVimView alloc] initWithFrame:[contentView frame]
                                  vimController:vimController];
     [vimView setAutoresizingMask:NSViewNotSizable];
-    [contentView addSubview:vimView];
+    [verticalSplitView setAutoresizesSubviews:NO];
+    [verticalSplitView setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
+    [verticalSplitView insertArrangedSubview:vimView atIndex:0];
 
+   // [contentView addSubview:vimView];
+
+    [contentView addSubview:verticalSplitView];
+    
     [win setDelegate:self];
     [win setInitialFirstResponder:[vimView textView]];
     
@@ -620,8 +634,8 @@
                     [fullScreenWindow centerView];
                 }
             } else {
-                [self resizeWindowToFitContentSize:contentSize
-                                      keepOnScreen:keepOnScreen];
+  //              [self resizeWindowToFitContentSize:contentSize
+   //                                   keepOnScreen:keepOnScreen];
             }
         }
 
@@ -1767,7 +1781,7 @@
 {
 	if(projectDrawerController == nil) {
 		projectDrawerController = [[MVPProjectDrawerController alloc] initWithNibName:@"MVPProjectDrawer" bundle:nil];
-		[projectDrawerController addToWindow:decoratedWindow];
+		[projectDrawerController addToWindow:verticalSplitView];
 	}
     
     [projectDrawerController show];
@@ -1777,7 +1791,7 @@
 {
 	if(projectDrawerController == nil) {
 		projectDrawerController = [[MVPProjectDrawerController alloc] initWithNibName:@"MVPProjectDrawer" bundle:nil];
-		[projectDrawerController addToWindow:decoratedWindow];
+		[projectDrawerController addToWindow:verticalSplitView];
 	}
     [projectDrawerController toggle];
 }

@@ -46,25 +46,43 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     [self stopWatchingProjectForChanges];
 }
 
--(void)addToWindow:(MMWindow *)window {	
-	NSSize contentSize = NSMakeSize(100, 100);
-	projectDrawer = [[NSDrawer alloc] initWithContentSize:contentSize preferredEdge:NSMinXEdge];
-	[projectDrawer setParentWindow:window];
+-(void)addToWindow:(NSSplitView *)splitView {
+//	NSSize contentSize = NSMakeSize(100, 100);
+/*
+    NSRect windowFrame = [[window contentView] bounds];
+    NSRect frame = NSMakeRect(0, 0, windowFrame.size.width/2, windowFrame.size.height);
+	projectDrawer = [[NSSplitView alloc] initWithFrame:frame];
+    [projectDrawer setVertical:YES];
+    [projectDrawer addSubview:self.view];
+    [projectDrawer adjustSubviews];
+    projectDrawer.delegate = self;
+    [[window contentView] addSubview:projectDrawer];
+  */
+    if([splitView.subviews containsObject:self.view]) {
+        return;
+    }
+    
+    [splitView insertArrangedSubview:self.view atIndex:0];
+    
+    /*
+    [projectDrawer setParentWindow:window];
 	[projectDrawer setMinContentSize:contentSize];	
 	[projectDrawer setMaxContentSize:NSMakeSize(400, 100)];	
-	[projectDrawer setContentView:self.view];	
+	[projectDrawer setContentView:self.view];
+     */
 }
 
 - (void)show {
-	[projectDrawer openOnEdge:NSMinXEdge];	
+	//[projectDrawer openOnEdge:NSMinXEdge];
+    
 } 
 
 - (void)toggle {
-    [projectDrawer toggle:self];	
+  //  [projectDrawer toggle:self];
 }
 
 - (void)hide {
-	[projectDrawer close];
+//	[projectDrawer close];
 }
 
 - (void)awakeFromNib {
@@ -355,6 +373,52 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 	}
 }
 
+# pragma mark NSSplitViewDelegate
+
+// -------------------------------------------------------------------------------
+//    splitView:effectiveRect:effectiveRect:forDrawnRect:ofDividerAtIndex
+// -------------------------------------------------------------------------------
+- (NSRect)splitView:(NSSplitView *)splitView effectiveRect:(NSRect)proposedEffectiveRect forDrawnRect:(NSRect)drawnRect ofDividerAtIndex:(NSInteger)dividerIndex
+{
+    NSRect effectiveRect = drawnRect;
+    
+    // don't steal as much from the scroll bar as NSSplitView normally would
+    effectiveRect.origin.x -= 2.0;
+    effectiveRect.size.width += 6.0;
+    return effectiveRect;
+}
+
+// -------------------------------------------------------------------------------
+//    splitView:additionalEffectiveRectOfDividerAtIndex:dividerIndex:
+// -------------------------------------------------------------------------------
+//- (NSRect)splitView:(NSSplitView *)splitView additionalEffectiveRectOfDividerAtIndex:(NSInteger)dividerIndex
+//{
+//    // we have a divider handle next to one of the split views in the window
+//    if (splitView == self.verticalSplitView)
+//    {
+//        return [self.dividerHandleView convertRect:(self.dividerHandleView).bounds toView:splitView];
+//    }
+//    else
+//    {
+//        return NSZeroRect;
+//    }
+//}
+
+// -------------------------------------------------------------------------------
+//    constrainMinCoordinate:proposedCoordinate:index
+// -------------------------------------------------------------------------------
+- (CGFloat)splitView:(NSSplitView *)splitView constrainMinCoordinate:(CGFloat)proposedCoordinate ofSubviewAt:(NSInteger)index
+{
+    // the primary vertical split view is asking for a constrained size,
+    // keep the left view no smaller than 120 points
+    CGFloat constrainedCoordinate = proposedCoordinate + 120.0;
+    return constrainedCoordinate;
+}
+
+//- (CGFloat)splitView:(NSSplitView *)splitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(NSInteger)dividerIndex
+//{
+//    return constrainedCoordinate;
+//}
 
 
 @end

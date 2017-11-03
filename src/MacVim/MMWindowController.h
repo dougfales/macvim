@@ -50,6 +50,7 @@
     BOOL                resizingDueToMove;
     int                 blurRadius;
     NSMutableArray      *afterWindowPresentedQueue;
+    NSSplitView         *verticalSplitView;
     MVPProjectDrawerController *projectDrawerController;
     MVPFastFindController      *fastFindController;
     MVPNewProjectController    *newProjectController;

@@ -13,10 +13,10 @@
 @class MVPProject;
 @class MVPDirEntry;
 
-@interface MVPProjectDrawerController : NSViewController <NSOutlineViewDelegate, NSOutlineViewDataSource, NSMenuDelegate> {
+@interface MVPProjectDrawerController : NSViewController <NSOutlineViewDelegate, NSOutlineViewDataSource, NSMenuDelegate, NSSplitViewDelegate> {
 	IBOutlet NSOutlineView *projectOutlineView;
 	IBOutlet NSScrollView *scrollView;
-	NSDrawer *projectDrawer;
+	NSSplitView *projectDrawer;
 	NSImage *folderImage;
 	MVPProject *project;
 	MVPDirEntry *rootEntry;
@@ -25,7 +25,7 @@
     FSEventStreamRef    fsEventStream;
 #endif
 }
-@property (nonatomic,retain) NSDrawer *projectDrawer;
+@property (nonatomic,retain) NSSplitView *projectDrawer;
 @property (nonatomic,retain) NSOutlineView *projectOutlineView;
 @property (nonatomic,retain) NSScrollView *scrollView;
 @property (nonatomic,retain) MVPProject *project;
