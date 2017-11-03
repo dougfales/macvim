@@ -77,6 +77,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 	[tableColumn setDataCell:imageAndTextCell];
     [projectOutlineView setTarget:self];
     [projectOutlineView setDoubleAction:@selector(openInNewTab:)];
+    [projectOutlineView setBackgroundColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]];
 }
 
 - (void)setProject:(MVPProject *)newProject {

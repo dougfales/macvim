@@ -174,10 +174,9 @@
     NSView *contentView = [win contentView];
     [contentView setAutoresizesSubviews:YES];
     
-//    NSRect windowFrame = [[win contentView] bounds];
-//    NSRect frame = NSMakeRect(0, 0, windowFrame.size.width/2, windowFrame.size.height);
     verticalSplitView = [[NSSplitView alloc] initWithFrame:[[win contentView] bounds]];
-    [verticalSplitView setVertical:YES];
+    verticalSplitView.vertical = YES;
+    verticalSplitView.dividerStyle = NSSplitViewDividerStyleThin;
     [verticalSplitView adjustSubviews];
 //    projectTree.delegate = self;
     
@@ -188,8 +187,6 @@
     [verticalSplitView setAutoresizesSubviews:NO];
     [verticalSplitView setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
     [verticalSplitView insertArrangedSubview:vimView atIndex:0];
-
-   // [contentView addSubview:vimView];
 
     [contentView addSubview:verticalSplitView];
     
