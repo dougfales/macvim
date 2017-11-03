@@ -12,10 +12,10 @@
 
 @interface MVPNewProjectController : NSWindowController<NSTextFieldDelegate> {
 	IBOutlet NSTextField *rootPathLabel;
-	IBOutlet NSTextField *projectNameTextField;
 	IBOutlet NSTextField *ignorePatternsTextField;
 	IBOutlet NSButton *createButton;
 	MMWindowController *windowController;
+    NSString *projectName;
 }
 @property(nonatomic, retain) MMWindowController *windowController;
 - (void)showNewProjectWindow;
