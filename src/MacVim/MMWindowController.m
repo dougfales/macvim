@@ -71,7 +71,7 @@
 #import "MMWindow.h"
 #import "MMWindowController.h"
 #import "Miscellaneous.h"
-#import "MVPProjectDrawerController.h"
+#import "MVPProjectTreeController.h"
 #import "MVPFastFindController.h"
 #import "MVPFindInProjectController.h"
 #import "MVPProject.h"
@@ -179,7 +179,7 @@
     verticalSplitView = [[NSSplitView alloc] initWithFrame:[[win contentView] bounds]];
     [verticalSplitView setVertical:YES];
     [verticalSplitView adjustSubviews];
-//    projectDrawer.delegate = self;
+//    projectTree.delegate = self;
     
     
     vimView = [[MMVimView alloc] initWithFrame:[contentView frame]
@@ -1720,7 +1720,7 @@
     // Popup a sheet while it loads!
     [project load];    
     [project save];
-    [projectDrawerController setProject:project];
+    [projectTreeController setProject:project];
     [self showDrawer:self];
     [vimController addVimInput:[NSString stringWithFormat:@":cd %@<CR>", [project pathToRoot]]];    
 }
@@ -1779,27 +1779,27 @@
 
 - (IBAction)showDrawer:(id)sender
 {
-	if(projectDrawerController == nil) {
-		projectDrawerController = [[MVPProjectDrawerController alloc] initWithNibName:@"MVPProjectDrawer" bundle:nil];
-		[projectDrawerController addToWindow:verticalSplitView];
+	if(projectTreeController == nil) {
+		projectTreeController = [[MVPProjectTreeController alloc] initWithNibName:@"MVPProjectTree" bundle:nil];
+		[projectTreeController addToWindow:verticalSplitView];
 	}
     
-    [projectDrawerController show];
+    [projectTreeController show];
 }
 
 - (IBAction)toggleDrawer:(id)sender
 {
-	if(projectDrawerController == nil) {
-		projectDrawerController = [[MVPProjectDrawerController alloc] initWithNibName:@"MVPProjectDrawer" bundle:nil];
-		[projectDrawerController addToWindow:verticalSplitView];
+	if(projectTreeController == nil) {
+		projectTreeController = [[MVPProjectTreeController alloc] initWithNibName:@"MVPProjectTree" bundle:nil];
+		[projectTreeController addToWindow:verticalSplitView];
 	}
-    [projectDrawerController toggle];
+    [projectTreeController toggle];
 }
 
 - (IBAction)viewLineOnGithub:(id)sender
 {
-    if(projectDrawerController) {
-        [projectDrawerController viewLineOnGithub:self];
+    if(projectTreeController) {
+        [projectTreeController viewLineOnGithub:self];
     }
 }
 

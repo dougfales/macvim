@@ -13,7 +13,7 @@
 @class MVPProject;
 @class MVPDirEntry;
 
-@interface MVPProjectDrawerController : NSViewController <NSOutlineViewDelegate, NSOutlineViewDataSource, NSMenuDelegate, NSSplitViewDelegate> {
+@interface MVPProjectTreeController : NSViewController <NSOutlineViewDelegate, NSOutlineViewDataSource, NSMenuDelegate, NSSplitViewDelegate> {
 	IBOutlet NSOutlineView *projectOutlineView;
 	IBOutlet NSScrollView *scrollView;
 	NSSplitView *projectDrawer;

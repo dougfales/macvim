@@ -77,9 +77,9 @@
 		91CE69E81F6BFFA100762681 /* MVPNewProjectController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE69E31F6BFFA100762681 /* MVPNewProjectController.m */; };
 		91CE69E91F6BFFA100762681 /* MVPNewProjectWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 91CE69E41F6BFFA100762681 /* MVPNewProjectWindow.xib */; };
 		91CE69EA1F6BFFA100762681 /* MVPProject.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE69E61F6BFFA100762681 /* MVPProject.m */; };
-		91CE6A021F6C005300762681 /* MVPProjectDrawer.xib in Resources */ = {isa = PBXBuildFile; fileRef = 91CE69FF1F6C005300762681 /* MVPProjectDrawer.xib */; };
-		91CE6A031F6C005300762681 /* MVPProjectDrawerCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE6A001F6C005300762681 /* MVPProjectDrawerCell.m */; };
-		91CE6A041F6C005300762681 /* MVPProjectDrawerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE6A011F6C005300762681 /* MVPProjectDrawerController.m */; };
+		91CE6A021F6C005300762681 /* MVPProjectTree.xib in Resources */ = {isa = PBXBuildFile; fileRef = 91CE69FF1F6C005300762681 /* MVPProjectTree.xib */; };
+		91CE6A031F6C005300762681 /* MVPProjectTreeCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE6A001F6C005300762681 /* MVPProjectTreeCell.m */; };
+		91CE6A041F6C005300762681 /* MVPProjectTreeController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE6A011F6C005300762681 /* MVPProjectTreeController.m */; };
 		91CE6A0C1F6C008000762681 /* MVPFastFind.xib in Resources */ = {isa = PBXBuildFile; fileRef = 91CE6A081F6C008000762681 /* MVPFastFind.xib */; };
 		91CE6A0D1F6C008000762681 /* MVPFastFindCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE6A091F6C008000762681 /* MVPFastFindCell.m */; };
 		91CE6A0E1F6C008000762681 /* MVPFastFindController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE6A0A1F6C008000762681 /* MVPFastFindController.m */; };
@@ -277,11 +277,11 @@
 		91CE69E41F6BFFA100762681 /* MVPNewProjectWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MVPNewProjectWindow.xib; sourceTree = "<group>"; };
 		91CE69E51F6BFFA100762681 /* MVPProject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVPProject.h; sourceTree = "<group>"; };
 		91CE69E61F6BFFA100762681 /* MVPProject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MVPProject.m; sourceTree = "<group>"; };
-		91CE69FD1F6C005300762681 /* MVPProjectDrawerCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVPProjectDrawerCell.h; sourceTree = "<group>"; };
-		91CE69FE1F6C005300762681 /* MVPProjectDrawerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVPProjectDrawerController.h; sourceTree = "<group>"; };
-		91CE69FF1F6C005300762681 /* MVPProjectDrawer.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MVPProjectDrawer.xib; sourceTree = "<group>"; };
-		91CE6A001F6C005300762681 /* MVPProjectDrawerCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MVPProjectDrawerCell.m; sourceTree = "<group>"; };
-		91CE6A011F6C005300762681 /* MVPProjectDrawerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MVPProjectDrawerController.m; sourceTree = "<group>"; };
+		91CE69FD1F6C005300762681 /* MVPProjectTreeCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVPProjectTreeCell.h; sourceTree = "<group>"; };
+		91CE69FE1F6C005300762681 /* MVPProjectTreeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVPProjectTreeController.h; sourceTree = "<group>"; };
+		91CE69FF1F6C005300762681 /* MVPProjectTree.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MVPProjectTree.xib; sourceTree = "<group>"; };
+		91CE6A001F6C005300762681 /* MVPProjectTreeCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MVPProjectTreeCell.m; sourceTree = "<group>"; };
+		91CE6A011F6C005300762681 /* MVPProjectTreeController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MVPProjectTreeController.m; sourceTree = "<group>"; };
 		91CE6A051F6C008000762681 /* MVPFastFindCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVPFastFindCell.h; sourceTree = "<group>"; };
 		91CE6A061F6C008000762681 /* MVPFastFindController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVPFastFindController.h; sourceTree = "<group>"; };
 		91CE6A071F6C008000762681 /* MVPFastFindResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVPFastFindResult.h; sourceTree = "<group>"; };
@@ -555,11 +555,11 @@
 		91CE69FB1F6C001100762681 /* Project Drawer */ = {
 			isa = PBXGroup;
 			children = (
-				91CE69FF1F6C005300762681 /* MVPProjectDrawer.xib */,
-				91CE69FD1F6C005300762681 /* MVPProjectDrawerCell.h */,
-				91CE69FE1F6C005300762681 /* MVPProjectDrawerController.h */,
-				91CE6A001F6C005300762681 /* MVPProjectDrawerCell.m */,
-				91CE6A011F6C005300762681 /* MVPProjectDrawerController.m */,
+				91CE69FF1F6C005300762681 /* MVPProjectTree.xib */,
+				91CE69FD1F6C005300762681 /* MVPProjectTreeCell.h */,
+				91CE69FE1F6C005300762681 /* MVPProjectTreeController.h */,
+				91CE6A001F6C005300762681 /* MVPProjectTreeCell.m */,
+				91CE6A011F6C005300762681 /* MVPProjectTreeController.m */,
 			);
 			name = "Project Drawer";
 			sourceTree = "<group>";
@@ -690,7 +690,7 @@
 				1DCD00C40E50B2B700460166 /* FindPrev.png in Resources */,
 				1DCD00C50E50B2B700460166 /* Help.png in Resources */,
 				1DCD00C60E50B2B700460166 /* LoadSesn.png in Resources */,
-				91CE6A021F6C005300762681 /* MVPProjectDrawer.xib in Resources */,
+				91CE6A021F6C005300762681 /* MVPProjectTree.xib in Resources */,
 				91CE6A0C1F6C008000762681 /* MVPFastFind.xib in Resources */,
 				1DCD00C70E50B2B700460166 /* Make.png in Resources */,
 				1DCD00C80E50B2B700460166 /* Open.png in Resources */,
@@ -755,7 +755,7 @@
 				91CE6A1C1F6C00CB00762681 /* SearchResult.m in Sources */,
 				91CE69E81F6BFFA100762681 /* MVPNewProjectController.m in Sources */,
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
-				91CE6A041F6C005300762681 /* MVPProjectDrawerController.m in Sources */,
+				91CE6A041F6C005300762681 /* MVPProjectTreeController.m in Sources */,
 				1D1474980C56703C0038FA2B /* MacVim.m in Sources */,
 				91CE69EA1F6BFFA100762681 /* MVPProject.m in Sources */,
 				1D1474A00C5673AE0038FA2B /* MMAppController.m in Sources */,
@@ -764,7 +764,7 @@
 				1D1474B60C56796D0038FA2B /* MMVimController.m in Sources */,
 				1D1474BC0C567A910038FA2B /* MMWindowController.m in Sources */,
 				91CE6A1B1F6C00CB00762681 /* MVPFindInProjectController.m in Sources */,
-				91CE6A031F6C005300762681 /* MVPProjectDrawerCell.m in Sources */,
+				91CE6A031F6C005300762681 /* MVPProjectTreeCell.m in Sources */,
 				1D09AB420C6A4D520045497E /* MMTypesetter.m in Sources */,
 				91CE69E71F6BFFA100762681 /* MVPDirEntry.m in Sources */,
 				1DD66ECE0C803D3600EBDAB3 /* MMApplication.m in Sources */,

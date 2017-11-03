@@ -16,7 +16,7 @@
 @class MMFullScreenWindow;
 @class MMVimController;
 @class MMVimView;
-@class MVPProjectDrawerController;
+@class MVPProjectTreeController;
 @class MVPFastFindController;
 @class MVPNewProjectController;
 @class MVPFindInProjectController;
@@ -51,7 +51,7 @@
     int                 blurRadius;
     NSMutableArray      *afterWindowPresentedQueue;
     NSSplitView         *verticalSplitView;
-    MVPProjectDrawerController *projectDrawerController;
+    MVPProjectTreeController *projectTreeController;
     MVPFastFindController      *fastFindController;
     MVPNewProjectController    *newProjectController;
     MVPFindInProjectController *findInProjectController;

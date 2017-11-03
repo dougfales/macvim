@@ -6,7 +6,7 @@
 //  MacVimProject (MVP) by Doug Fales, 2010
 //
 
-#import "MVPProjectDrawerController.h"
+#import "MVPProjectTreeController.h"
 #import "MVPProjectDrawerCell.h"
 #import "MMAppController.h"
 #import "MMVimController.h"
@@ -25,7 +25,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
                 const FSEventStreamEventFlags eventFlags[],
                 const FSEventStreamEventId eventIds[])
 {
-    MVPProjectDrawerController *drawerController = (MVPProjectDrawerController *)clientCallBackInfo;    
+    MVPProjectTreeController *drawerController = (MVPProjectTreeController *)clientCallBackInfo;    
     size_t i;
     for(i=0; i < numEvents; i++){
         [drawerController refreshPath:[(NSArray *)eventPaths objectAtIndex:i]];
@@ -33,7 +33,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 }
 #endif
 
-@implementation MVPProjectDrawerController
+@implementation MVPProjectTreeController
 @synthesize projectDrawer;
 @synthesize projectOutlineView;
 @synthesize scrollView;
