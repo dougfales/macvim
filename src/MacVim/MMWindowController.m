@@ -174,22 +174,22 @@
     NSView *contentView = [win contentView];
     [contentView setAutoresizesSubviews:YES];
     
-    verticalSplitView = [[NSSplitView alloc] initWithFrame:[[win contentView] bounds]];
-    verticalSplitView.delegate = self;
-    verticalSplitView.vertical = YES;
-    verticalSplitView.dividerStyle = NSSplitViewDividerStyleThin;
-    [verticalSplitView adjustSubviews];
-//    projectTree.delegate = self;
-    
+    projectSplitView = [[NSSplitView alloc] initWithFrame:[[win contentView] bounds]];
+    projectSplitView.delegate = self;
+    projectSplitView.vertical = YES;
+    projectSplitView.dividerStyle = NSSplitViewDividerStyleThin;
+    [projectSplitView adjustSubviews];
     
     vimView = [[MMVimView alloc] initWithFrame:[contentView frame]
                                  vimController:vimController];
     [vimView setAutoresizingMask:NSViewNotSizable];
-    [verticalSplitView setAutoresizesSubviews:NO];
-    [verticalSplitView setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
-    [verticalSplitView insertArrangedSubview:vimView atIndex:0];
+    [projectSplitView setAutoresizesSubviews:NO];
+    [projectSplitView setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
+   // [projectSplitView setAutoresizingMask:NSViewNotSizable];
 
-    [contentView addSubview:verticalSplitView];
+    [projectSplitView insertArrangedSubview:vimView atIndex:0];
+
+    [contentView addSubview:projectSplitView];
     
     [win setDelegate:self];
     [win setInitialFirstResponder:[vimView textView]];
@@ -621,6 +621,10 @@
                                   [self constrainContentSizeToScreenSize:[vimView desiredSize]]];
             [vimView setFrameSize:contentSize];
 
+            NSSize fullWindowSize = contentSize;
+            NSInteger sidebarWidth = (projectSplitView.frame.size.width - contentSize.width);
+            fullWindowSize.width += sidebarWidth;
+            
             if (fullScreenWindow) {
                 // NOTE! Don't mark the full-screen content view as needing an
                 // update unless absolutely necessary since when it is updated
@@ -632,10 +636,8 @@
                     [fullScreenWindow centerView];
                 }
             } else {
-//                  TODO: Re-enable this when I've figured out how to make it observe the size of the tree view inside the NSSplitView.
-//                  Right now, it causes a weird looping resize/dedraw that prevents you from seeing the tree view.
-//                  [self resizeWindowToFitContentSize:contentSize
-//                                   keepOnScreen:keepOnScreen];
+                [self resizeWindowToFitContentSize:fullWindowSize
+                                   keepOnScreen:keepOnScreen];
             }
         }
 
@@ -1434,7 +1436,7 @@
 {
     if(projectTreeController == nil) {
         projectTreeController = [[MVPProjectTreeController alloc] initWithNibName:@"MVPProjectTree" bundle:nil];
-        [projectTreeController addToSplitView:verticalSplitView];
+        [projectTreeController addToSplitView:projectSplitView];
     }
     
     [projectTreeController show];
@@ -1444,7 +1446,7 @@
 {
     if(projectTreeController == nil) {
         projectTreeController = [[MVPProjectTreeController alloc] initWithNibName:@"MVPProjectTree" bundle:nil];
-        [projectTreeController addToSplitView:verticalSplitView];
+        [projectTreeController addToSplitView:projectSplitView];
     }
     [projectTreeController toggle];
 }
