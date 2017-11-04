@@ -175,6 +175,7 @@
     [contentView setAutoresizesSubviews:YES];
     
     verticalSplitView = [[NSSplitView alloc] initWithFrame:[[win contentView] bounds]];
+    verticalSplitView.delegate = self;
     verticalSplitView.vertical = YES;
     verticalSplitView.dividerStyle = NSSplitViewDividerStyleThin;
     [verticalSplitView adjustSubviews];
@@ -1055,6 +1056,14 @@
 - (void)windowDidChangeBackingProperties:(NSNotification *)notification
 {
     [vimController sendMessage:BackingPropertiesChangedMsgID data:nil];
+}
+
+- (BOOL)splitView:(NSSplitView *)splitView shouldAdjustSizeOfSubview:(NSView *)view
+{
+    if(view == vimView) {
+        return YES;
+    }
+    return NO;
 }
 
 // This is not an NSWindow delegate method, our custom MMWindow class calls it

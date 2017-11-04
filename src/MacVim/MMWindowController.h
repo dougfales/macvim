@@ -22,7 +22,7 @@
 @class MVPFindInProjectController;
 @class MVPProject;
 
-@interface MMWindowController : NSWindowController<NSWindowDelegate>
+@interface MMWindowController : NSWindowController<NSWindowDelegate, NSSplitViewDelegate>
 {
     MMVimController     *vimController;
     MMVimView           *vimView;
