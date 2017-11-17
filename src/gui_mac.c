@@ -267,9 +267,7 @@ static struct
 /*  {XK_Help,		'%', '1'}, */
 /*  {XK_Undo,		'&', '8'}, */
 /*  {XK_BackSpace,	'k', 'b'}, */
-#ifndef MACOS_X
-    {vk_Delete,		'k', 'b'},
-#endif
+/*  {vk_Delete,		'k', 'b'}, */
     {vk_Insert,		'k', 'I'},
     {vk_FwdDelete,	'k', 'D'},
     {vk_Home,		'k', 'h'},
@@ -1612,7 +1610,7 @@ gui_mac_scroll_action(ControlHandle theControl, short partCode)
     else			/* Bottom scrollbar */
     {
 	sb_info = sb;
-	page = W_WIDTH(curwin) - 5;
+	page = curwin->w_width - 5;
     }
 
     switch (partCode)

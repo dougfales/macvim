@@ -33,6 +33,7 @@ void channel_clear(channel_T *channel);
 void channel_free_all(void);
 char_u *channel_read_block(channel_T *channel, ch_part_T part, int timeout);
 void common_channel_read(typval_T *argvars, typval_T *rettv, int raw);
+void channel_may_read(channel_T *channel, ch_part_T part, char *func);
 channel_T *channel_fd2channel(sock_T fd, ch_part_T *partp);
 void channel_handle_events(int only_keep_open);
 int channel_any_keep_open(void);
@@ -40,9 +41,9 @@ void channel_set_nonblock(channel_T *channel, ch_part_T part);
 int channel_send(channel_T *channel, ch_part_T part, char_u *buf_arg, int len_arg, char *fun);
 void ch_expr_common(typval_T *argvars, typval_T *rettv, int eval);
 void ch_raw_common(typval_T *argvars, typval_T *rettv, int eval);
-int channel_poll_setup(int nfd_in, void *fds_in);
+int channel_poll_setup(int nfd_in, void *fds_in, int *towait);
 int channel_poll_check(int ret_in, void *fds_in);
-int channel_select_setup(int maxfd_in, void *rfds_in, void *wfds_in);
+int channel_select_setup(int maxfd_in, void *rfds_in, void *wfds_in, struct timeval *tv, struct timeval **tvp);
 int channel_select_check(int ret_in, void *rfds_in, void *wfds_in);
 int channel_parse_messages(void);
 int channel_any_readahead(void);
@@ -71,7 +72,4 @@ job_T *job_start(typval_T *argvars, jobopt_T *opt_arg);
 char *job_status(job_T *job);
 void job_info(job_T *job, dict_T *dict);
 int job_stop(job_T *job, typval_T *argvars, char *type);
-#ifdef FEAT_GUI_MACVIM
-void channel_read(channel_T *channel, ch_part_T part, char *func);
-#endif
 /* vim: set ft=c : */

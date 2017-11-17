@@ -59,7 +59,7 @@ static int	block_redo = FALSE;
  * Returns a value between 0 and 255, index in maphash.
  * Put Normal/Visual mode mappings mostly separately from Insert/Cmdline mode.
  */
-#define MAP_HASH(mode, c1) (((mode) & (NORMAL + VISUAL + SELECTMODE + OP_PENDING)) ? (c1) : ((c1) ^ 0x80))
+#define MAP_HASH(mode, c1) (((mode) & (NORMAL + VISUAL + SELECTMODE + OP_PENDING + TERMINAL)) ? (c1) : ((c1) ^ 0x80))
 
 /*
  * Each mapping is put in one of the 256 hash lists, to speed up finding it.
@@ -1893,7 +1893,7 @@ char_avail(void)
     int	    retval;
 
 #ifdef FEAT_EVAL
-    /* When test_disable_char_avail(1) was called pretend there is no
+    /* When test_override("char_avail", 1) was called pretend there is no
      * typeahead. */
     if (disable_char_avail_for_testing)
 	return FALSE;
@@ -2290,10 +2290,8 @@ vgetorpeek(int advance)
 				msg_row = Rows - 1;
 				msg_clr_eos();		/* clear ruler */
 			    }
-#ifdef FEAT_WINDOWS
 			    status_redraw_all();
 			    redraw_statuslines();
-#endif
 			    showmode();
 			    setcursor();
 			    continue;
@@ -2668,8 +2666,8 @@ vgetorpeek(int advance)
 					++col;
 				}
 				curwin->w_wrow = curwin->w_cline_row
-					   + curwin->w_wcol / W_WIDTH(curwin);
-				curwin->w_wcol %= W_WIDTH(curwin);
+					   + curwin->w_wcol / curwin->w_width;
+				curwin->w_wcol %= curwin->w_width;
 				curwin->w_wcol += curwin_col_off();
 #ifdef FEAT_MBYTE
 				col = 0;	/* no correction needed */
@@ -2686,7 +2684,7 @@ vgetorpeek(int advance)
 			else if (curwin->w_p_wrap && curwin->w_wrow)
 			{
 			    --curwin->w_wrow;
-			    curwin->w_wcol = W_WIDTH(curwin) - 1;
+			    curwin->w_wcol = curwin->w_width - 1;
 #ifdef FEAT_MBYTE
 			    col = curwin->w_cursor.col - 1;
 #endif
@@ -3188,6 +3186,7 @@ input_available(void)
  * for :xmap  mode is VISUAL
  * for :smap  mode is SELECTMODE
  * for :omap  mode is OP_PENDING
+ * for :tmap  mode is TERMINAL
  *
  * for :abbr  mode is INSERT + CMDLINE
  * for :iabbr mode is INSERT
@@ -3832,6 +3831,8 @@ get_map_mode(char_u **cmdp, int forceit)
 	mode = SELECTMODE;			/* :smap */
     else if (modec == 'o')
 	mode = OP_PENDING;			/* :omap */
+    else if (modec == 't')
+	mode = TERMINAL;			/* :tmap */
     else
     {
 	--p;
@@ -4892,6 +4893,9 @@ makemap(
 		    case LANGMAP:
 			c1 = 'l';
 			break;
+		    case TERMINAL:
+			c1 = 't';
+			break;
 		    default:
 			IEMSG(_("E228: makemap: Illegal mode"));
 			return FAIL;
@@ -5253,7 +5257,7 @@ check_map(
 }
 #endif
 
-#if defined(MSWIN) || defined(MACOS)
+#if defined(MSWIN) || defined(MACOS_X)
 
 #define VIS_SEL	(VISUAL+SELECTMODE)	/* abbreviation */
 
@@ -5304,7 +5308,7 @@ static struct initmap
 # endif
 #endif
 
-#if defined(MACOS)
+#if defined(MACOS_X)
 # if !defined(FEAT_GUI_MACVIM)
 	/* Use the Standard MacOS binding. */
 	/* paste, copy and cut */
@@ -5328,7 +5332,7 @@ static struct initmap
     void
 init_mappings(void)
 {
-#if defined(MSWIN) ||defined(MACOS)
+#if defined(MSWIN) || defined(MACOS_X)
     int		i;
 
     for (i = 0; i < (int)(sizeof(initmappings) / sizeof(struct initmap)); ++i)
@@ -5336,7 +5340,8 @@ init_mappings(void)
 #endif
 }
 
-#if defined(MSWIN) || defined(FEAT_CMDWIN) || defined(MACOS) || defined(PROTO)
+#if defined(MSWIN) || defined(FEAT_CMDWIN) || defined(MACOS_X) \
+							     || defined(PROTO)
 /*
  * Add a mapping "map" for mode "mode".
  * Need to put string in allocated memory, because do_map() will modify it.

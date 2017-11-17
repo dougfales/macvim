@@ -856,10 +856,6 @@ mch_stackcheck(char *p)
  * completely full.
  */
 
-#if defined(HAVE_AVAILABILITYMACROS_H)
-# include <AvailabilityMacros.h>
-#endif
-
 #ifndef SIGSTKSZ
 # define SIGSTKSZ 8000    /* just a guess of how much stack is needed... */
 #endif
@@ -879,13 +875,6 @@ init_signal_stack(void)
     if (signal_stack != NULL)
     {
 # ifdef HAVE_SIGALTSTACK
-#  if defined(__APPLE__) && (!defined(MAC_OS_X_VERSION_MAX_ALLOWED) \
-		|| MAC_OS_X_VERSION_MAX_ALLOWED <= 1040)
-	/* missing prototype.  Adding it to osdef?.h.in doesn't work, because
-	 * "struct sigaltstack" needs to be declared. */
-	extern int sigaltstack(const struct sigaltstack *ss, struct sigaltstack *oss);
-#  endif
-
 #  ifdef HAVE_SS_BASE
 	sigstk.ss_base = signal_stack;
 #  else
@@ -2738,9 +2727,8 @@ mch_getperm(char_u *name)
 }
 
 /*
- * set file permission for 'name' to 'perm'
- *
- * return FAIL for failure, OK otherwise
+ * Set file permission for "name" to "perm".
+ * Return FAIL for failure, OK otherwise.
  */
     int
 mch_setperm(char_u *name, long perm)
@@ -2753,6 +2741,18 @@ mch_setperm(char_u *name, long perm)
 #endif
 		    (mode_t)perm) == 0 ? OK : FAIL);
 }
+
+#if defined(HAVE_FCHMOD) || defined(PROTO)
+/*
+ * Set file permission for open file "fd" to "perm".
+ * Return FAIL for failure, OK otherwise.
+ */
+    int
+mch_fsetperm(int fd, long perm)
+{
+    return (fchmod(fd, (mode_t)perm) == 0 ? OK : FAIL);
+}
+#endif
 
 #if defined(HAVE_ACL) || defined(PROTO)
 # ifdef HAVE_SYS_ACL_H
@@ -4080,7 +4080,7 @@ wait4pid(pid_t child, waitstatus *status)
 mch_parse_cmd(char_u *cmd, int use_shcf, char ***argv, int *argc)
 {
     int		i;
-    char_u	*p;
+    char_u	*p, *d;
     int		inquote;
 
     /*
@@ -4098,26 +4098,34 @@ mch_parse_cmd(char_u *cmd, int use_shcf, char ***argv, int *argc)
 	    if (i == 1)
 		(*argv)[*argc] = (char *)p;
 	    ++*argc;
+	    d = p;
 	    while (*p != NUL && (inquote || (*p != ' ' && *p != TAB)))
 	    {
 		if (p[0] == '"')
+		    /* quotes surrounding an argument and are dropped */
 		    inquote = !inquote;
-		else if (p[0] == '\\' && p[1] != NUL)
+		else
 		{
-		    /* First pass: skip over "\ " and "\"".
-		     * Second pass: Remove the backslash. */
-		    if (i == 1)
-			mch_memmove(p, p + 1, STRLEN(p));
-		    else
+		    if (p[0] == '\\' && p[1] != NUL)
+		    {
+			/* First pass: skip over "\ " and "\"".
+			 * Second pass: Remove the backslash. */
 			++p;
+		    }
+		    if (i == 1)
+			*d++ = *p;
 		}
 		++p;
 	    }
 	    if (*p == NUL)
+	    {
+		if (i == 1)
+		    *d++ = NUL;
 		break;
+	    }
 	    if (i == 1)
-		*p++ = NUL;
-	    p = skipwhite(p);
+		*d++ = NUL;
+	    p = skipwhite(p + 1);
 	}
 	if (*argv == NULL)
 	{
@@ -5352,6 +5360,9 @@ mch_job_start(char **argv, job_T *job, jobopt_T *options)
 	    channel = add_channel();
 	if (channel == NULL)
 	    goto failed;
+	if (job->jv_tty_out != NULL)
+	    ch_log(channel, "using pty %s on fd %d",
+					       job->jv_tty_out, pty_master_fd);
     }
 
     BLOCK_SIGNALS(&curset);
@@ -5724,6 +5735,9 @@ mch_create_pty_channel(job_T *job, jobopt_T *options)
 	close(pty_master_fd);
 	return FAIL;
     }
+    if (job->jv_tty_out != NULL)
+	ch_log(channel, "using pty %s on fd %d",
+					       job->jv_tty_out, pty_master_fd);
     job->jv_channel = channel;  /* ch_refcount was set by add_channel() */
     channel->ch_keep_open = TRUE;
 
@@ -5991,7 +6005,7 @@ RealWaitForChar(int fd, long msec, int *check_for_gpm UNUSED, int *interrupted)
 	}
 # endif
 #ifdef FEAT_JOB_CHANNEL
-	nfd = channel_poll_setup(nfd, &fds);
+	nfd = channel_poll_setup(nfd, &fds, &towait);
 #endif
 	if (interrupted != NULL)
 	    *interrupted = FALSE;
@@ -6043,7 +6057,8 @@ RealWaitForChar(int fd, long msec, int *check_for_gpm UNUSED, int *interrupted)
 	}
 # endif
 #ifdef FEAT_JOB_CHANNEL
-	if (ret > 0)
+	/* also call when ret == 0, we may be polling a keep-open channel */
+	if (ret >= 0)
 	    ret = channel_poll_check(ret, &fds);
 #endif
 
@@ -6119,7 +6134,7 @@ select_eintr:
 	}
 # endif
 # ifdef FEAT_JOB_CHANNEL
-	maxfd = channel_select_setup(maxfd, &rfds, &wfds);
+	maxfd = channel_select_setup(maxfd, &rfds, &wfds, &tv, &tvp);
 # endif
 	if (interrupted != NULL)
 	    *interrupted = FALSE;
@@ -6205,7 +6220,8 @@ select_eintr:
 	}
 # endif
 #ifdef FEAT_JOB_CHANNEL
-	if (ret > 0)
+	/* also call when ret == 0, we may be polling a keep-open channel */
+	if (ret >= 0)
 	    ret = channel_select_check(ret, &rfds, &wfds);
 #endif
 

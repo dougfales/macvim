@@ -4,9 +4,7 @@ if !has('timers')
   finish
 endif
 
-if !exists('*WaitFor')
-  source shared.vim
-endif
+source shared.vim
 
 func MyHandler(timer)
   let g:val += 1
@@ -124,7 +122,7 @@ func Test_paused()
   let slept = WaitFor('g:val == 1')
   call assert_equal(1, g:val)
   if has('reltime')
-    call assert_inrange(0, 30, slept)
+    call assert_inrange(0, 50, slept)
   else
     call assert_inrange(0, 10, slept)
   endif
@@ -244,6 +242,17 @@ func Test_peek_and_get_char()
   let c = getchar()
   call assert_equal(char2nr('a'), c)
   call timer_stop(intr)
+endfunc
+
+func Test_ex_mode()
+  " Function with an empty line.
+  func Foo(...)
+
+  endfunc
+  let timer =  timer_start(40, function('g:Foo'), {'repeat':-1})
+  " This used to throw error E749.
+  exe "normal Qsleep 100m\rvi\r"
+  call timer_stop(timer)
 endfunc
 
 " vim: shiftwidth=2 sts=2 expandtab
