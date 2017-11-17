@@ -1274,12 +1274,14 @@ endif
 if has("gui_macvim")
   an Project.New\ Project\ \.\.\.            <Nop>
   an Project.Open\ Project\ \.\.\.           <Nop>
+  an &Project.Recent\ Projects.Clear\ Menu		<Nop>
   an Project.Fast\ Find                      <Nop>
   an Project.Find\ in\ Project               <Nop>
   an Project.Toggle\ Drawer                  <Nop>
 
   macm Project.New\ Project\ \.\.\.		action=newProject:
   macm Project.Open\ Project\ \.\.\.		action=openProject:
+  macm Project.Recent\ Projects.Clear\ Menu     action=clearRecentProjects:
   
   macm Project.Fast\ Find	key=<D-D>	action=fastFind:
   macm Project.Find\ in\ Project  key=<D-F>	action=findInProject:
