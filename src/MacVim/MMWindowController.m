@@ -1062,7 +1062,7 @@
 
 - (BOOL)splitView:(NSSplitView *)splitView shouldAdjustSizeOfSubview:(NSView *)view
 {
-    return (view == vimView) {
+    return (view == vimView);
 }
 
 // This is not an NSWindow delegate method, our custom MMWindow class calls it
