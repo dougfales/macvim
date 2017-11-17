@@ -68,7 +68,7 @@ static int au_find_group(char_u *name);
 #  define FIO_PUT_CP(x) (((x) & 0xffff) << 16)	/* put codepage in top word */
 #  define FIO_GET_CP(x)	(((x)>>16) & 0xffff)	/* get codepage from top word */
 # endif
-# ifdef MACOS_X
+# ifdef MACOS_CONVERT
 #  define FIO_MACROMAN	0x20	/* convert MacRoman */
 # endif
 # define FIO_ENDIAN_L	0x80	/* little endian */
@@ -127,7 +127,7 @@ static int make_bom(char_u *buf, char_u *name);
 # ifdef WIN3264
 static int get_win_fio_flags(char_u *ptr);
 # endif
-# ifdef MACOS_X
+# ifdef MACOS_CONVERT
 static int get_mac_fio_flags(char_u *ptr);
 # endif
 #endif
@@ -716,7 +716,29 @@ readfile(
 	/* Set swap file protection bits after creating it. */
 	if (swap_mode > 0 && curbuf->b_ml.ml_mfp != NULL
 			  && curbuf->b_ml.ml_mfp->mf_fname != NULL)
-	    (void)mch_setperm(curbuf->b_ml.ml_mfp->mf_fname, (long)swap_mode);
+	{
+	    char_u *swap_fname = curbuf->b_ml.ml_mfp->mf_fname;
+
+	    /*
+	     * If the group-read bit is set but not the world-read bit, then
+	     * the group must be equal to the group of the original file.  If
+	     * we can't make that happen then reset the group-read bit.  This
+	     * avoids making the swap file readable to more users when the
+	     * primary group of the user is too permissive.
+	     */
+	    if ((swap_mode & 044) == 040)
+	    {
+		stat_T	swap_st;
+
+		if (mch_stat((char *)swap_fname, &swap_st) >= 0
+			&& st.st_gid != swap_st.st_gid
+			&& fchown(curbuf->b_ml.ml_mfp->mf_fd, -1, st.st_gid)
+									 == -1)
+		    swap_mode &= 0600;
+	    }
+
+	    (void)mch_setperm(swap_fname, (long)swap_mode);
+	}
 #endif
     }
 
@@ -1088,7 +1110,7 @@ retry:
 	    fio_flags = get_win_fio_flags(fenc);
 # endif
 
-# ifdef MACOS_X
+# ifdef MACOS_CONVERT
 	/* Conversion from Apple MacRoman to latin1 or UTF-8 */
 	if (fio_flags == 0)
 	    fio_flags = get_mac_fio_flags(fenc);
@@ -1274,7 +1296,7 @@ retry:
 		else if (fio_flags & FIO_CODEPAGE)
 		    size = size / ICONV_MULT;	/* also worst case */
 # endif
-# ifdef MACOS_X
+# ifdef MACOS_CONVERT
 		else if (fio_flags & FIO_MACROMAN)
 		    size = size / ICONV_MULT;	/* also worst case */
 # endif
@@ -1956,17 +1978,17 @@ retry:
 		    {
 			if (fio_flags & FIO_ENDIAN_L)
 			{
-			    u8c = (*--p << 24);
-			    u8c += (*--p << 16);
-			    u8c += (*--p << 8);
+			    u8c = (unsigned)*--p << 24;
+			    u8c += (unsigned)*--p << 16;
+			    u8c += (unsigned)*--p << 8;
 			    u8c += *--p;
 			}
 			else	/* big endian */
 			{
 			    u8c = *--p;
-			    u8c += (*--p << 8);
-			    u8c += (*--p << 16);
-			    u8c += (*--p << 24);
+			    u8c += (unsigned)*--p << 8;
+			    u8c += (unsigned)*--p << 16;
+			    u8c += (unsigned)*--p << 24;
 			}
 		    }
 		    else    /* UTF-8 */
@@ -3841,6 +3863,7 @@ buf_write(
 	    char_u	*rootname;
 #if defined(UNIX)
 	    int		did_set_shortname;
+	    mode_t	umask_save;
 #endif
 
 	    copybuf = alloc(BUFSIZE + 1);
@@ -3972,10 +3995,17 @@ buf_write(
 		    /* remove old backup, if present */
 		    mch_remove(backup);
 		    /* Open with O_EXCL to avoid the file being created while
-		     * we were sleeping (symlink hacker attack?) */
+		     * we were sleeping (symlink hacker attack?). Reset umask
+		     * if possible to avoid mch_setperm() below. */
+#ifdef UNIX
+		    umask_save = umask(0);
+#endif
 		    bfd = mch_open((char *)backup,
 				O_WRONLY|O_CREAT|O_EXTRA|O_EXCL|O_NOFOLLOW,
 								 perm & 0777);
+#ifdef UNIX
+		    (void)umask(umask_save);
+#endif
 		    if (bfd < 0)
 		    {
 			vim_free(backup);
@@ -3983,11 +4013,12 @@ buf_write(
 		    }
 		    else
 		    {
-			/* set file protection same as original file, but
-			 * strip s-bit */
+			/* Set file protection same as original file, but
+			 * strip s-bit.  Only needed if umask() wasn't used
+			 * above. */
+#ifndef UNIX
 			(void)mch_setperm(backup, perm & 0777);
-
-#ifdef UNIX
+#else
 			/*
 			 * Try to set the group of the backup same as the
 			 * original file. If this fails, set the protection
@@ -4174,9 +4205,7 @@ buf_write(
 #ifdef FEAT_TITLE
 	need_maketitle = TRUE;	    /* set window title later */
 #endif
-#ifdef FEAT_WINDOWS
 	status_redraw_all();	    /* redraw status lines later */
-#endif
     }
 
     if (end > buf->b_ml.ml_line_count)
@@ -4201,20 +4230,6 @@ buf_write(
 	    goto restore_backup;
 	}
     }
-
-#ifdef MACOS_CLASSIC /* TODO: Is it need for MACOS_X? (Dany) */
-    /*
-     * Before risking to lose the original file verify if there's
-     * a resource fork to preserve, and if cannot be done warn
-     * the users. This happens when overwriting without backups.
-     */
-    if (backup == NULL && overwriting && !append)
-	if (mch_has_resource_fork(fname))
-	{
-	    errmsg = (char_u *)_("E460: The resource fork would be lost (add ! to override)");
-	    goto restore_backup;
-	}
-#endif
 
 #ifdef VMS
     vms_remove_version(fname); /* remove version */
@@ -4273,7 +4288,7 @@ buf_write(
     }
 # endif
 
-# ifdef MACOS_X
+# ifdef MACOS_CONVERT
     if (converted && wb_flags == 0 && (wb_flags = get_mac_fio_flags(fenc)) != 0)
     {
 	write_info.bw_conv_buflen = bufsize * 3;
@@ -4371,6 +4386,11 @@ buf_write(
 	}
 	else
 	{
+#ifdef HAVE_FTRUNCATE
+# define TRUNC_ON_OPEN 0
+#else
+# define TRUNC_ON_OPEN O_TRUNC
+#endif
 	    /*
 	     * Open the file "wfname" for writing.
 	     * We may try to open the file twice: If we can't write to the file
@@ -4383,7 +4403,7 @@ buf_write(
 	     */
 	    while ((fd = mch_open((char *)wfname, O_WRONLY | O_EXTRA | (append
 				? (forceit ? (O_APPEND | O_CREAT) : O_APPEND)
-				: (O_CREAT | O_TRUNC))
+				: (O_CREAT | TRUNC_ON_OPEN))
 				, perm < 0 ? 0666 : (perm & 0777))) < 0)
 	    {
 		/*
@@ -4476,13 +4496,31 @@ restore_backup:
 	    }
 	    write_info.bw_fd = fd;
 
-#if defined(MACOS_CLASSIC) || defined(WIN3264)
-	    /* TODO: Is it need for MACOS_X? (Dany) */
-	    /*
-	     * On macintosh copy the original files attributes (i.e. the backup)
-	     * This is done in order to preserve the resource fork and the
-	     * Finder attribute (label, comments, custom icons, file creator)
-	     */
+#if defined(UNIX)
+	    {
+		stat_T	st;
+
+		/* Double check we are writing the intended file before making
+		 * any changes. */
+		if (overwriting
+			&& (!dobackup || backup_copy)
+			&& fname == wfname
+			&& perm >= 0
+			&& mch_fstat(fd, &st) == 0
+			&& st.st_ino != st_old.st_ino)
+		{
+		    close(fd);
+		    errmsg = (char_u *)_("E949: File changed while writing");
+		    goto fail;
+		}
+	    }
+#endif
+#ifdef HAVE_FTRUNCATE
+	    if (!append)
+		ftruncate(fd, (off_t)0);
+#endif
+
+#if defined(WIN3264)
 	    if (backup != NULL && overwriting && !append)
 	    {
 		if (backup_copy)
@@ -4733,7 +4771,7 @@ restore_backup:
 	 */
 	if (p_fs && fsync(fd) != 0 && !device)
 	{
-	    errmsg = (char_u *)_("E667: Fsync failed");
+	    errmsg = (char_u *)_(e_fsync);
 	    end = 0;
 	}
 #endif
@@ -4752,15 +4790,17 @@ restore_backup:
 # ifdef HAVE_FCHOWN
 	    stat_T	st;
 
-	    /* don't change the owner when it's already OK, some systems remove
-	     * permission or ACL stuff */
+	    /* Don't change the owner when it's already OK, some systems remove
+	     * permission or ACL stuff. */
 	    if (mch_stat((char *)wfname, &st) < 0
 		    || st.st_uid != st_old.st_uid
 		    || st.st_gid != st_old.st_gid)
 	    {
-		ignored = fchown(fd, st_old.st_uid, st_old.st_gid);
-		if (perm >= 0)	/* set permission again, may have changed */
-		    (void)mch_setperm(wfname, perm);
+		/* changing owner might not be possible */
+		ignored = fchown(fd, st_old.st_uid, -1);
+		/* if changing group fails clear the group permissions */
+		if (fchown(fd, -1, st_old.st_gid) == -1 && perm > 0)
+		    perm &= ~070;
 	    }
 # endif
 	    buf_setino(buf);
@@ -4770,18 +4810,26 @@ restore_backup:
 	    buf_setino(buf);
 #endif
 
+#ifdef UNIX
+	if (made_writable)
+	    perm &= ~0200;	/* reset 'w' bit for security reasons */
+#endif
+#ifdef HAVE_FCHMOD
+	/* set permission of new file same as old file */
+	if (perm >= 0)
+	    (void)mch_fsetperm(fd, perm);
+#endif
 	if (close(fd) != 0)
 	{
 	    errmsg = (char_u *)_("E512: Close failed");
 	    end = 0;
 	}
 
-#ifdef UNIX
-	if (made_writable)
-	    perm &= ~0200;	/* reset 'w' bit for security reasons */
-#endif
-	if (perm >= 0)		/* set perm. of new file same as old file */
+#ifndef HAVE_FCHMOD
+	/* set permission of new file same as old file */
+	if (perm >= 0)
 	    (void)mch_setperm(wfname, perm);
+#endif
 #ifdef HAVE_ACL
 	/*
 	 * Probably need to set the ACL before changing the user (can't set the
@@ -5201,10 +5249,6 @@ nofail:
 
     got_int |= prev_got_int;
 
-#ifdef MACOS_CLASSIC /* TODO: Is it need for MACOS_X? (Dany) */
-    /* Update machine specific information. */
-    mch_post_buffer_write(buf);
-#endif
 #ifdef FEAT_ODB_EDITOR
     odb_post_buffer_write(buf);
 #endif
@@ -5978,7 +6022,7 @@ get_win_fio_flags(char_u *ptr)
 }
 #endif
 
-#ifdef MACOS_X
+#ifdef MACOS_CONVERT
 /*
  * Check "ptr" for a Carbon supported encoding and return the FIO_ flags
  * needed for the internal conversion to/from utf-8 or latin1.
@@ -6201,10 +6245,8 @@ shorten_fnames(int force)
 	 * also have a swap file. */
 	mf_fullname(buf->b_ml.ml_mfp);
     }
-#ifdef FEAT_WINDOWS
     status_redraw_all();
     redraw_tabline = TRUE;
-#endif
 }
 
 #if (defined(FEAT_DND) && defined(FEAT_GUI_GTK)) \
@@ -7694,6 +7736,8 @@ forward_slash(char_u *fname)
  * together, to avoid having to match the pattern too often.
  * The result is an array of Autopat lists, which point to AutoCmd lists:
  *
+ * last_autopat[0]  -----------------------------+
+ *						 V
  * first_autopat[0] --> Autopat.next  -->  Autopat.next -->  NULL
  *			Autopat.cmds	   Autopat.cmds
  *			    |			 |
@@ -7706,6 +7750,8 @@ forward_slash(char_u *fname)
  *			    V
  *			   NULL
  *
+ * last_autopat[1]  --------+
+ *			    V
  * first_autopat[1] --> Autopat.next  -->  NULL
  *			Autopat.cmds
  *			    |
@@ -7733,11 +7779,12 @@ typedef struct AutoCmd
 
 typedef struct AutoPat
 {
+    struct AutoPat  *next;		/* next AutoPat in AutoPat list; MUST
+					 * be the first entry */
     char_u	    *pat;		/* pattern as typed (NULL when pattern
 					   has been removed) */
     regprog_T	    *reg_prog;		/* compiled regprog for pattern */
     AutoCmd	    *cmds;		/* list of commands to do */
-    struct AutoPat  *next;		/* next AutoPat in AutoPat list */
     int		    group;		/* group ID */
     int		    patlen;		/* strlen() of pat */
     int		    buflocal_nr;	/* !=0 for buffer-local AutoPat */
@@ -7773,6 +7820,8 @@ static struct event_name
     {"BufWritePost",	EVENT_BUFWRITEPOST},
     {"BufWritePre",	EVENT_BUFWRITEPRE},
     {"BufWriteCmd",	EVENT_BUFWRITECMD},
+    {"CmdlineEnter",	EVENT_CMDLINEENTER},
+    {"CmdlineLeave",	EVENT_CMDLINELEAVE},
     {"CmdwinEnter",	EVENT_CMDWINENTER},
     {"CmdwinLeave",	EVENT_CMDWINLEAVE},
     {"CmdUndefined",	EVENT_CMDUNDEFINED},
@@ -7846,6 +7895,16 @@ static struct event_name
 };
 
 static AutoPat *first_autopat[NUM_EVENTS] =
+{
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+};
+
+static AutoPat *last_autopat[NUM_EVENTS] =
 {
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
@@ -8053,6 +8112,15 @@ au_cleanup(void)
 	    /* remove the pattern if it has been marked for deletion */
 	    if (ap->pat == NULL)
 	    {
+		if (ap->next == NULL)
+		{
+		    if (prev_ap == &(first_autopat[(int)event]))
+			last_autopat[(int)event] = NULL;
+		    else
+			/* this depends on the "next" field being the first in
+			 * the struct */
+			last_autopat[(int)event] = (AutoPat *)prev_ap;
+		}
 		*prev_ap = ap->next;
 		vim_regfree(ap->reg_prog);
 		vim_free(ap);
@@ -8717,9 +8785,13 @@ do_autocmd_event(
 	}
 
 	/*
-	 * Find AutoPat entries with this pattern.
+	 * Find AutoPat entries with this pattern.  When adding a command it
+	 * always goes at or after the last one, so start at the end.
 	 */
-	prev_ap = &first_autopat[(int)event];
+	if (!forceit && *cmd != NUL && last_autopat[(int)event] != NULL)
+	    prev_ap = &last_autopat[(int)event];
+	else
+	    prev_ap = &first_autopat[(int)event];
 	while ((ap = *prev_ap) != NULL)
 	{
 	    if (ap->pat != NULL)
@@ -8825,6 +8897,7 @@ do_autocmd_event(
 		}
 		ap->cmds = NULL;
 		*prev_ap = ap;
+		last_autopat[(int)event] = ap;
 		ap->next = NULL;
 		if (group == AUGROUP_ALL)
 		    ap->group = current_augroup;
@@ -9001,9 +9074,7 @@ aucmd_prepbuf(
     buf_T	*buf)		/* new curbuf */
 {
     win_T	*win;
-#ifdef FEAT_WINDOWS
     int		save_ea;
-#endif
 #ifdef FEAT_AUTOCHDIR
     int		save_acd;
 #endif
@@ -9012,13 +9083,9 @@ aucmd_prepbuf(
     if (buf == curbuf)		/* be quick when buf is curbuf */
 	win = curwin;
     else
-#ifdef FEAT_WINDOWS
 	FOR_ALL_WINDOWS(win)
 	    if (win->w_buffer == buf)
 		break;
-#else
-	win = NULL;
-#endif
 
     /* Allocate "aucmd_win" when needed.  If this fails (out of memory) fall
      * back to using the current window. */
@@ -9064,7 +9131,6 @@ aucmd_prepbuf(
 	globaldir = NULL;
 
 
-#ifdef FEAT_WINDOWS
 	/* Split the current window, put the aucmd_win in the upper half.
 	 * We don't want the BufEnter or WinEnter autocommands. */
 	block_autocmds();
@@ -9072,20 +9138,19 @@ aucmd_prepbuf(
 	save_ea = p_ea;
 	p_ea = FALSE;
 
-# ifdef FEAT_AUTOCHDIR
+#ifdef FEAT_AUTOCHDIR
 	/* Prevent chdir() call in win_enter_ext(), through do_autochdir(). */
 	save_acd = p_acd;
 	p_acd = FALSE;
-# endif
+#endif
 
 	(void)win_split_ins(0, WSP_TOP, aucmd_win, 0);
 	(void)win_comp_pos();   /* recompute window positions */
 	p_ea = save_ea;
-# ifdef FEAT_AUTOCHDIR
+#ifdef FEAT_AUTOCHDIR
 	p_acd = save_acd;
-# endif
-	unblock_autocmds();
 #endif
+	unblock_autocmds();
 	curwin = aucmd_win;
     }
     curbuf = buf;
@@ -9102,14 +9167,11 @@ aucmd_prepbuf(
 aucmd_restbuf(
     aco_save_T	*aco)		/* structure holding saved values */
 {
-#ifdef FEAT_WINDOWS
     int dummy;
-#endif
 
     if (aco->use_aucmd_win)
     {
 	--curbuf->b_nwindows;
-#ifdef FEAT_WINDOWS
 	/* Find "aucmd_win", it can't be closed, but it may be in another tab
 	 * page. Do not trigger autocommands here. */
 	block_autocmds();
@@ -9150,12 +9212,9 @@ win_found:
 	else
 	    /* Hmm, original window disappeared.  Just use the first one. */
 	    curwin = firstwin;
-# ifdef FEAT_EVAL
+#ifdef FEAT_EVAL
 	vars_clear(&aucmd_win->w_vars->dv_hashtab);  /* free all w: variables */
 	hash_init(&aucmd_win->w_vars->dv_hashtab);   /* re-use the hashtab */
-# endif
-#else
-	curwin = aco->save_curwin;
 #endif
 	curbuf = curwin->w_buffer;
 
@@ -9181,9 +9240,7 @@ win_found:
     else
     {
 	/* restore curwin */
-#ifdef FEAT_WINDOWS
 	if (win_valid(aco->save_curwin))
-#endif
 	{
 	    /* Restore the buffer which was previously edited by curwin, if
 	     * it was changed, we are still the same window and the buffer is
@@ -9420,6 +9477,7 @@ apply_autocmds_group(
 #endif
     int		did_save_redobuff = FALSE;
     save_redo_T	save_redo;
+    int		save_KeyTyped = KeyTyped;
 
     /*
      * Quickly return if there are no autocommands for this event or
@@ -9716,6 +9774,7 @@ apply_autocmds_group(
 	prof_child_exit(&wait_time);
 # endif
 #endif
+    KeyTyped = save_KeyTyped;
     vim_free(fname);
     vim_free(sfname);
     --nesting;		/* see matching increment above */

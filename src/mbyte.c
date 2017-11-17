@@ -105,7 +105,10 @@
 # include <X11/Intrinsic.h>
 #endif
 #ifdef X_LOCALE
-#include <X11/Xlocale.h>
+# include <X11/Xlocale.h>
+# if !defined(HAVE_MBLEN) && !defined(mblen)
+#  define mblen _Xmblen
+# endif
 #endif
 
 #if defined(FEAT_GUI_GTK) && defined(FEAT_XIM)
@@ -415,7 +418,7 @@ enc_alias_table[] =
     {"euccn",		IDX_EUC_CN},
     {"gb2312",		IDX_EUC_CN},
     {"euctw",		IDX_EUC_TW},
-#if defined(WIN3264) || defined(WIN32UNIX) || defined(MACOS)
+#if defined(WIN3264) || defined(WIN32UNIX) || defined(MACOS_X)
     {"japan",		IDX_CP932},
     {"korea",		IDX_CP949},
     {"prc",		IDX_CP936},
@@ -516,7 +519,7 @@ mb_init(void)
     int		n;
     int		enc_dbcs_new = 0;
 #if defined(USE_ICONV) && !defined(WIN3264) && !defined(WIN32UNIX) \
-	&& !defined(MACOS)
+	&& !defined(MACOS_CONVERT)
 # define LEN_FROM_CONV
     vimconv_T	vimconv;
     char_u	*p;
@@ -711,7 +714,8 @@ codepage_invalid:
 	     * API */
 	    n = IsDBCSLeadByteEx(enc_dbcs, (WINBYTE)i) ? 2 : 1;
 #else
-# if defined(MACOS) || defined(__amigaos4__) || defined(__ANDROID__)
+# if defined(__amigaos4__) || defined(__ANDROID__) || \
+				   !(defined(HAVE_MBLEN) || defined(X_LOCALE))
 	    /*
 	     * if mblen() is not available, character which MSB is turned on
 	     * are treated as leading byte character. (note : This assumption
@@ -720,18 +724,14 @@ codepage_invalid:
 	    n = (i & 0x80) ? 2 : 1;
 # else
 	    char buf[MB_MAXBYTES + 1];
-# ifdef X_LOCALE
-#  ifndef mblen
-#   define mblen _Xmblen
-#  endif
-# endif
+
 	    if (i == NUL)	/* just in case mblen() can't handle "" */
 		n = 1;
 	    else
 	    {
 		buf[0] = i;
 		buf[1] = 0;
-#ifdef LEN_FROM_CONV
+#  ifdef LEN_FROM_CONV
 		if (vimconv.vc_type != CONV_NONE)
 		{
 		    /*
@@ -748,7 +748,7 @@ codepage_invalid:
 			n = 2;
 		}
 		else
-#endif
+#  endif
 		{
 		    /*
 		     * mblen() should return -1 for invalid (means the leading
@@ -918,7 +918,7 @@ dbcs_class(unsigned lead, unsigned trail)
 		unsigned char tb = trail;
 
 		/* convert process code to JIS */
-# if defined(WIN3264) || defined(WIN32UNIX) || defined(MACOS)
+# if defined(WIN3264) || defined(WIN32UNIX) || defined(MACOS_X)
 		/* process code is SJIS */
 		if (lb <= 0x9f)
 		    lb = (lb - 0x81) * 2 + 0x21;
@@ -1402,6 +1402,8 @@ static struct interval ambiguous[] =
     int
 utf_uint2cells(UINT32_T c)
 {
+    if (c >= 0x100 && utf_iscomposing((int)c))
+	return 0;
     return utf_char2cells((int)c);
 }
 #endif
@@ -4385,45 +4387,31 @@ enc_alias_search(char_u *name)
 
 #if defined(FEAT_MBYTE) || defined(PROTO)
 
-#ifdef HAVE_LANGINFO_H
-# include <langinfo.h>
-#endif
+# ifdef HAVE_LANGINFO_H
+#  include <langinfo.h>
+# endif
 
+# ifndef FEAT_GUI_W32
 /*
- * Get the canonicalized encoding of the current locale.
+ * Get the canonicalized encoding from the specified locale string "locale"
+ * or from the environment variables LC_ALL, LC_CTYPE and LANG.
  * Returns an allocated string when successful, NULL when not.
  */
     char_u *
-enc_locale(void)
+enc_locale_env(char *locale)
 {
-#ifndef WIN3264
-    char	*s;
+    char	*s = locale;
     char	*p;
     int		i;
-#endif
     char	buf[50];
-#ifdef WIN3264
-    long	acp = GetACP();
-
-    if (acp == 1200)
-	STRCPY(buf, "ucs-2le");
-    else if (acp == 1252)	    /* cp1252 is used as latin1 */
-	STRCPY(buf, "latin1");
-    else
-	sprintf(buf, "cp%ld", acp);
-#else
-# ifdef HAVE_NL_LANGINFO_CODESET
-    if ((s = nl_langinfo(CODESET)) == NULL || *s == NUL)
-# endif
-#  if defined(HAVE_LOCALE_H) || defined(X_LOCALE)
-	if ((s = setlocale(LC_CTYPE, NULL)) == NULL || *s == NUL)
-#  endif
-	    if ((s = getenv("LC_ALL")) == NULL || *s == NUL)
-		if ((s = getenv("LC_CTYPE")) == NULL || *s == NUL)
-		    s = getenv("LANG");
 
     if (s == NULL || *s == NUL)
-	return FAIL;
+	if ((s = getenv("LC_ALL")) == NULL || *s == NUL)
+	    if ((s = getenv("LC_CTYPE")) == NULL || *s == NUL)
+		s = getenv("LANG");
+
+    if (s == NULL || *s == NUL)
+	return NULL;
 
     /* The most generic locale format is:
      * language[_territory][.codeset][@modifier][+special][,[sponsor][_revision]]
@@ -4458,12 +4446,46 @@ enc_locale(void)
 	    break;
     }
     buf[i] = NUL;
-#endif
 
     return enc_canonize((char_u *)buf);
 }
+# endif
 
-#if defined(WIN3264) || defined(PROTO) || defined(FEAT_CYGWIN_WIN32_CLIPBOARD)
+/*
+ * Get the canonicalized encoding of the current locale.
+ * Returns an allocated string when successful, NULL when not.
+ */
+    char_u *
+enc_locale(void)
+{
+# ifdef WIN3264
+    char	buf[50];
+    long	acp = GetACP();
+
+    if (acp == 1200)
+	STRCPY(buf, "ucs-2le");
+    else if (acp == 1252)	    /* cp1252 is used as latin1 */
+	STRCPY(buf, "latin1");
+    else
+	sprintf(buf, "cp%ld", acp);
+
+    return enc_canonize((char_u *)buf);
+# else
+    char	*s;
+
+#  ifdef HAVE_NL_LANGINFO_CODESET
+    if ((s = nl_langinfo(CODESET)) == NULL || *s == NUL)
+#  endif
+#  if defined(HAVE_LOCALE_H) || defined(X_LOCALE)
+	if ((s = setlocale(LC_CTYPE, NULL)) == NULL || *s == NUL)
+#  endif
+	    s = NULL;
+
+    return enc_locale_env(s);
+# endif
+}
+
+# if defined(WIN3264) || defined(PROTO) || defined(FEAT_CYGWIN_WIN32_CLIPBOARD)
 /*
  * Convert an encoding name to an MS-Windows codepage.
  * Returns zero if no codepage can be figured out.
@@ -4490,7 +4512,7 @@ encname2codepage(char_u *name)
 	return cp;
     return 0;
 }
-#endif
+# endif
 
 # if defined(USE_ICONV) || defined(PROTO)
 
@@ -6590,7 +6612,7 @@ convert_setup_ext(
 	vcp->vc_cpto = to_is_utf8 ? 0 : encname2codepage(to);
     }
 #endif
-#ifdef MACOS_X
+#ifdef MACOS_CONVERT
     else if ((from_prop & ENC_MACROMAN) && (to_prop & ENC_LATIN1))
     {
 	vcp->vc_type = CONV_MAC_LATIN1;

@@ -54,9 +54,7 @@
 # define fd_close(sd) close(sd)
 #endif
 
-#ifndef FEAT_GUI_MACVIM
 static void channel_read(channel_T *channel, ch_part_T part, char *func);
-#endif
 
 /* Whether a redraw is needed for appending a line to a buffer. */
 static int channel_need_redraw = FALSE;
@@ -2919,8 +2917,6 @@ channel_close(channel_T *channel, int invoke_close_cb)
 	      channel->ch_close_cb = NULL;
 	      channel->ch_close_partial = NULL;
 
-	      --channel->ch_refcount;
-
 	      if (channel_need_redraw)
 	      {
 		  channel_need_redraw = FALSE;
@@ -2931,6 +2927,8 @@ channel_close(channel_T *channel, int invoke_close_cb)
 		  /* any remaining messages are useless now */
 		  for (part = PART_SOCK; part < PART_IN; ++part)
 		      drop_messages(channel, part);
+
+	      --channel->ch_refcount;
 	}
     }
 
@@ -3271,11 +3269,7 @@ channel_close_now(channel_T *channel)
  * "part" is PART_SOCK, PART_OUT or PART_ERR.
  * The data is put in the read queue.  No callbacks are invoked here.
  */
-#ifndef FEAT_GUI_MACVIM
     static void
-#else
-    void
-#endif
 channel_read(channel_T *channel, ch_part_T part, char *func)
 {
     static char_u	*buf = NULL;
@@ -3560,6 +3554,22 @@ common_channel_read(typval_T *argvars, typval_T *rettv, int raw)
 theend:
     free_job_options(&opt);
 }
+
+# ifdef FEAT_GUI_MACVIM
+/*
+ * Read from channel "channel" in dispatch event handler.
+ * Channel may be already read out elsewhere before the handler invoked
+ * after an event arrived, so should be checked again.
+ */
+    void
+channel_may_read(channel_T *channel, ch_part_T part, char *func)
+{
+    sock_T	fd = channel->ch_part[part].ch_fd;
+
+    if (fd != INVALID_FD && channel_wait(channel, fd, 0) == CW_READY)
+	channel_read(channel, part, func);
+}
+# endif
 
 # if defined(WIN32) || defined(FEAT_GUI_X11) || defined(FEAT_GUI_GTK) \
 	|| defined(PROTO)
@@ -3985,6 +3995,8 @@ ch_raw_common(typval_T *argvars, typval_T *rettv, int eval)
     free_job_options(&opt);
 }
 
+# define KEEP_OPEN_TIME 20  /* msec */
+
 # if (defined(UNIX) && !defined(HAVE_SELECT)) || defined(PROTO)
 /*
  * Add open channels to the poll struct.
@@ -3992,7 +4004,7 @@ ch_raw_common(typval_T *argvars, typval_T *rettv, int eval)
  * The type of "fds" is hidden to avoid problems with the function proto.
  */
     int
-channel_poll_setup(int nfd_in, void *fds_in)
+channel_poll_setup(int nfd_in, void *fds_in, int *towait)
 {
     int		nfd = nfd_in;
     channel_T	*channel;
@@ -4007,10 +4019,21 @@ channel_poll_setup(int nfd_in, void *fds_in)
 
 	    if (ch_part->ch_fd != INVALID_FD)
 	    {
-		ch_part->ch_poll_idx = nfd;
-		fds[nfd].fd = ch_part->ch_fd;
-		fds[nfd].events = POLLIN;
-		nfd++;
+		if (channel->ch_keep_open)
+		{
+		    /* For unknown reason poll() returns immediately for a
+		     * keep-open channel.  Instead of adding it to the fds add
+		     * a short timeout and check, like polling. */
+		    if (*towait < 0 || *towait > KEEP_OPEN_TIME)
+			*towait = KEEP_OPEN_TIME;
+		}
+		else
+		{
+		    ch_part->ch_poll_idx = nfd;
+		    fds[nfd].fd = ch_part->ch_fd;
+		    fds[nfd].events = POLLIN;
+		    nfd++;
+		}
 	    }
 	    else
 		channel->ch_part[part].ch_poll_idx = -1;
@@ -4046,6 +4069,12 @@ channel_poll_check(int ret_in, void *fds_in)
 		channel_read(channel, part, "channel_poll_check");
 		--ret;
 	    }
+	    else if (channel->ch_part[part].ch_fd != INVALID_FD
+						      && channel->ch_keep_open)
+	    {
+		/* polling a keep-open channel */
+		channel_read(channel, part, "channel_poll_check_keep_open");
+	    }
 	}
 
 	in_part = &channel->ch_part[PART_IN];
@@ -4062,11 +4091,17 @@ channel_poll_check(int ret_in, void *fds_in)
 # endif /* UNIX && !HAVE_SELECT */
 
 # if (!defined(WIN32) && defined(HAVE_SELECT)) || defined(PROTO)
+
 /*
  * The "fd_set" type is hidden to avoid problems with the function proto.
  */
     int
-channel_select_setup(int maxfd_in, void *rfds_in, void *wfds_in)
+channel_select_setup(
+	int maxfd_in,
+	void *rfds_in,
+	void *wfds_in,
+	struct timeval *tv,
+	struct timeval **tvp)
 {
     int		maxfd = maxfd_in;
     channel_T	*channel;
@@ -4082,9 +4117,25 @@ channel_select_setup(int maxfd_in, void *rfds_in, void *wfds_in)
 
 	    if (fd != INVALID_FD)
 	    {
-		FD_SET((int)fd, rfds);
-		if (maxfd < (int)fd)
-		    maxfd = (int)fd;
+		if (channel->ch_keep_open)
+		{
+		    /* For unknown reason select() returns immediately for a
+		     * keep-open channel.  Instead of adding it to the rfds add
+		     * a short timeout and check, like polling. */
+		    if (*tvp == NULL || tv->tv_sec > 0
+					|| tv->tv_usec > KEEP_OPEN_TIME * 1000)
+		    {
+			*tvp = tv;
+			tv->tv_sec = 0;
+			tv->tv_usec = KEEP_OPEN_TIME * 1000;
+		    }
+		}
+		else
+		{
+		    FD_SET((int)fd, rfds);
+		    if (maxfd < (int)fd)
+			maxfd = (int)fd;
+		}
 	    }
 	}
     }
@@ -4118,6 +4169,11 @@ channel_select_check(int ret_in, void *rfds_in, void *wfds_in)
 		channel_read(channel, part, "channel_select_check");
 		FD_CLR(fd, rfds);
 		--ret;
+	    }
+	    else if (fd != INVALID_FD && channel->ch_keep_open)
+	    {
+		/* polling a keep-open channel */
+		channel_read(channel, part, "channel_select_check_keep_open");
 	    }
 	}
 
