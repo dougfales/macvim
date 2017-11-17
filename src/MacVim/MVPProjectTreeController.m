@@ -54,8 +54,8 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 }
 
 - (void)show {
+    // TODO: Get rid of all references to "ProjectDrawer" and either remove the "Toggle Drawer" menu item or make it collapse/expand the splitview.
 	//[projectDrawer openOnEdge:NSMinXEdge];
-    
 } 
 
 - (void)toggle {

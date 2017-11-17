@@ -532,7 +532,7 @@
 				91CE69E01F6BFFA100762681 /* MVPDirEntry.h */,
 				91CE69E11F6BFFA100762681 /* MVPDirEntry.m */,
 				91CE69FC1F6C001700762681 /* Find in Project */,
-				91CE69FB1F6C001100762681 /* Project Drawer */,
+				91CE69FB1F6C001100762681 /* Project SplitView */,
 				91CE69FA1F6C000C00762681 /* Fast Find */,
 			);
 			name = "MacVim Project";
@@ -552,7 +552,7 @@
 			name = "Fast Find";
 			sourceTree = "<group>";
 		};
-		91CE69FB1F6C001100762681 /* Project Drawer */ = {
+		91CE69FB1F6C001100762681 /* Project SplitView */ = {
 			isa = PBXGroup;
 			children = (
 				91CE69FF1F6C005300762681 /* MVPProjectTree.xib */,
@@ -561,7 +561,7 @@
 				91CE6A001F6C005300762681 /* MVPProjectTreeCell.m */,
 				91CE6A011F6C005300762681 /* MVPProjectTreeController.m */,
 			);
-			name = "Project Drawer";
+			name = "Project SplitView";
 			sourceTree = "<group>";
 		};
 		91CE69FC1F6C001700762681 /* Find in Project */ = {
