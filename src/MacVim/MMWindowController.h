@@ -121,7 +121,6 @@
 - (IBAction)openProject:(id)sender;
 - (IBAction)openProjectAtPath:(NSString*)projectPath;
 - (IBAction)newProject:(id)sender;
-- (IBAction)recentProjects:(id)sender;
 - (IBAction)toggleDrawer:(id)sender;
 - (IBAction)showDrawer:(id)sender;
 - (IBAction)findInProject:(id)sender;

@@ -1440,10 +1440,7 @@
     
     [projectTreeController show];
 }
-- (IBAction)recentProjects:(id)sender
-{
-    
-}
+
 - (IBAction)toggleDrawer:(id)sender
 {
     if(projectTreeController == nil) {
