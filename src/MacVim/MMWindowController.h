@@ -125,6 +125,9 @@
 - (IBAction)showDrawer:(id)sender;
 - (IBAction)findInProject:(id)sender;
 - (IBAction)viewLineOnGithub:(id)sender;
+- (IBAction)openRecentProject:(id)sender;
+- (IBAction)clearRecentProjects:(id)sender;
+
 
 @property (nonatomic, retain) MVPProject *project;
 

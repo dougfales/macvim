@@ -1418,6 +1418,8 @@
         MVPProject *p = [MVPProject loadFromDisk:[url path]];
         [self setProject:p];
         [[NSDocumentController sharedDocumentController] noteNewRecentFilePath:[url path]];
+        [MVPProject noticeRecentProject:[url path]];
+        [[MMAppController sharedInstance] updateRecentProjects];
     }
 }
 
@@ -1454,6 +1456,20 @@
         [projectTreeController viewLineOnGithub:self];
     }
 }
+
+- (IBAction)openRecentProject:(id)sender
+{
+    NSMenuItem *recentProjectItem = sender;
+    NSString *projectPath = [recentProjectItem representedObject];
+    [self openProjectAtPath:projectPath];
+}
+
+
+- (IBAction)clearRecentProjects:(id)sender
+{
+    [[MMAppController sharedInstance] clearRecentProjects];
+}
+
 
 @end // MMWindowController
 
