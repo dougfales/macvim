@@ -140,6 +140,7 @@ typedef struct
 - (void)addInputSourceChangedObserver;
 - (void)removeInputSourceChangedObserver;
 - (void)inputSourceChanged:(NSNotification *)notification;
+- (NSMenu *)recentProjectsMenu;
 @end
 
 
@@ -837,6 +838,35 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     }
 }
 
+- (void)updateRecentProjects {
+    NSMenu *recentProjectsSubmenu = [self recentProjectsMenu];
+    if(recentProjectsSubmenu) {
+        NSMenuItem *clearItem = [[recentProjectsSubmenu itemWithTitle:@"Clear Menu"] retain];
+        [recentProjectsSubmenu removeAllItems];
+        
+        NSArray *recentProjects = [MVPProject recentProjects];
+        for(int i=0; i < recentProjects.count; i++) {
+            NSString *filePath = [recentProjects objectAtIndex:i];
+            NSString *prettyPath = [[filePath stringByAbbreviatingWithTildeInPath] stringByDeletingLastPathComponent];
+            NSMenuItem *item = [recentProjectsSubmenu addItemWithTitle:prettyPath action:@selector(openRecentProject:) keyEquivalent:@""];
+            [item setRepresentedObject:filePath];
+        }
+        [recentProjectsSubmenu addItem:[NSMenuItem separatorItem]];
+        [recentProjectsSubmenu addItem:clearItem];
+    }
+}
+
+- (void)clearRecentProjects {
+    NSMenu *recentProjectsSubmenu = [self recentProjectsMenu];
+    if(recentProjectsSubmenu) {
+        NSMenuItem *clearItem = [[recentProjectsSubmenu itemWithTitle:@"Clear Menu"] retain];
+        [recentProjectsSubmenu removeAllItems];
+        [recentProjectsSubmenu addItem:[NSMenuItem separatorItem]];
+        [recentProjectsSubmenu addItem:clearItem];
+    }
+    [MVPProject clearRecentProjects];
+}
+
 - (void)setMainMenu:(NSMenu *)mainMenu
 {
     if ([NSApp mainMenu] == mainMenu) return;
@@ -898,6 +928,9 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
         }
     }
     [NSApp setWindowsMenu:windowsMenu];
+    
+    [self updateRecentProjects];
+    
 }
 
 - (NSArray *)filterOpenFiles:(NSArray *)filenames
@@ -2559,5 +2592,18 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
         [tv checkImState];
     }
 }
+    
+    
+    - (NSMenu *)recentProjectsMenu {
+        NSMenu *recentProjectsSubmenu = nil;
+        NSMenu *projectsMenu = [[NSApp mainMenu] findProjectsMenu];
+        if(projectsMenu) {
+            NSMenuItem *recentProjectsMenuItem = [projectsMenu itemWithTitle:@"Recent Projects"];
+            recentProjectsSubmenu = [recentProjectsMenuItem submenu];
+        }
+        return recentProjectsSubmenu;
+    }
+    
+
 
 @end // MMAppController (Private)

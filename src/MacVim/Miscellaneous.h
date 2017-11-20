@@ -115,6 +115,7 @@ enum {
 - (NSMenu *)findApplicationMenu;
 - (NSMenu *)findServicesMenu;
 - (NSMenu *)findFileMenu;
+- (NSMenu *)findProjectsMenu;
 @end
 
 

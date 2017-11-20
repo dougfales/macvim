@@ -60,6 +60,38 @@ static NSString *_pathToGit;
     return _pathToGit;
 }
 
++ (void)noticeRecentProject:(NSString *)pathToProjectFile
+{
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    NSMutableArray *newRecentProjects = [NSMutableArray arrayWithCapacity:10];
+    NSArray *recentProjects = [ud objectForKey:kProjectRecentProjects];
+    NSInteger maxRecentProjects = 10;
+    [newRecentProjects addObject:pathToProjectFile];
+    for(NSInteger i = 0; i < recentProjects.count && i < maxRecentProjects; i++) {
+        NSString *s = [recentProjects objectAtIndex:i];
+        if(![s isEqualToString:pathToProjectFile]){
+            [newRecentProjects addObject:s];
+        }
+    }
+    [ud setObject:newRecentProjects forKey:kProjectRecentProjects];
+}
+
++ (NSArray *)recentProjects
+{
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    NSMutableArray *recentProjects = [ud objectForKey:kProjectRecentProjects];
+    if(recentProjects == nil){
+        return [NSArray array];
+    }
+    return recentProjects;
+}
+
++ (void)clearRecentProjects
+{
+    NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+    [ud setObject:[NSMutableArray arrayWithCapacity:10] forKey:kProjectRecentProjects];
+}
+
 - (id)initWithRoot:(NSString *)root andName:(NSString *)newName andIgnorePatterns:(NSString *)patterns {
 	if((self = [super init])) {
 		self.pathToRoot = root;

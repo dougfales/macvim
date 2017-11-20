@@ -174,6 +174,11 @@ NSString *MMUseCGLayerAlwaysKey         = @"MMUseCGLayerAlways";
     return [self findMenuContainingItemWithAction:@selector(performClose:)];
 }
 
+- (NSMenu *)findProjectsMenu
+{
+    return [self findMenuContainingItemWithAction:@selector(openProject:)];
+}
+
 @end // NSMenu (MMExtras)
 
 

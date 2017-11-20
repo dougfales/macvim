@@ -39,5 +39,8 @@
 
 + (MVPProject *)loadFromDisk:(NSString *)pathToProjectFile;
 + (NSString *)pathToGit;
++ (void)noticeRecentProject:(NSString *)pathToProjectFile;
++ (NSArray *)recentProjects;
++ (void)clearRecentProjects;
 
 @end
