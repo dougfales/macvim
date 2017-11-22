@@ -177,7 +177,7 @@ static NSString *_pathToGit;
 
 #pragma mark Project File Tree
 - (void)initializeFileTree {
-	NSURL *directoryURL = [NSURL URLWithString:self.pathToRoot];
+    NSURL *directoryURL = [NSURL URLWithString:[NSString stringWithFormat:@"file://%@", self.pathToRoot]];
 	self.rootDirEntry = [[MVPDirEntry alloc] initWithURL:directoryURL andParent:nil andProjectRoot:self.pathToRoot andExcludePredicate:self.excludePredicate];
     [self.rootDirEntry buildTree];
 }

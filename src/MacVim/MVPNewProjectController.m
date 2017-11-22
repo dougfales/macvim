@@ -40,8 +40,10 @@
 }
 
 - (IBAction)createProject:(id)sender {
-	MVPProject *project = [[MVPProject alloc] initWithRoot:[self selectedRoot] andName:[self selectedName] andIgnorePatterns:[self selectedIgnorePatterns]];
+    NSString *projectPath = [self selectedRoot];
+	MVPProject *project = [[MVPProject alloc] initWithRoot:projectPath andName:[self selectedName] andIgnorePatterns:[self selectedIgnorePatterns]];
 	[self.windowController setProject:project];
+    [MVPProject noticeRecentProject:projectPath];
 	[self close];
 }
 

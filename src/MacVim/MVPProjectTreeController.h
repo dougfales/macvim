@@ -34,6 +34,7 @@
 -(void)show;
 -(void)hide;
 - (void)toggle;
+- (void)reload;
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification;
 - (void)refreshPath:(NSString *)path;
 - (void)startWatchingProjectForChanges;
@@ -47,5 +48,6 @@
 - (IBAction)viewOnGithub:(id)sender;
 - (IBAction)viewLineOnGithub:(id)sender;
 - (IBAction)renameFile:(id)sender;
+
 @end
 

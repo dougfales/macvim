@@ -102,6 +102,7 @@
 - (void)applicationDidChangeScreenParameters:(NSNotification *)notification;
 - (void)enterNativeFullScreen;
 - (void)processAfterWindowPresentedQueue;
+- (void)initProjectTree;
 + (NSString *)tabBarStyleForUnified;
 + (NSString *)tabBarStyleForMetal;
 @end
@@ -1370,6 +1371,7 @@
     // Popup a sheet while it loads!
     [project load];
     [project save];
+    [self initProjectTree];
     [projectTreeController setProject:project];
     [self showDrawer:self];
     [vimController addVimInput:[NSString stringWithFormat:@":cd %@<CR>", [project pathToRoot]]];
@@ -1396,7 +1398,7 @@
 - (IBAction)openProjectAtPath:(NSString*)projectPath{
     if (projectPath) {
         MVPProject *project = [MVPProject loadFromDisk:projectPath];
-        [[NSDocumentController sharedDocumentController] noteNewRecentFilePath:projectPath];
+        [MVPProject noticeRecentProject:projectPath];
         [self showDrawer:self];
         [self setProject:project];
     }
@@ -1411,13 +1413,11 @@
     panel.allowedFileTypes = fileTypes;
     panel.directoryURL = [NSURL URLWithString:NSHomeDirectory()];
     
-    [self showDrawer:self];
     int result = [panel runModal];
     if(result == NSModalResponseOK){
         NSURL *url = [[panel URLs] objectAtIndex:0];
         MVPProject *p = [MVPProject loadFromDisk:[url path]];
         [self setProject:p];
-        [[NSDocumentController sharedDocumentController] noteNewRecentFilePath:[url path]];
         [MVPProject noticeRecentProject:[url path]];
         [[MMAppController sharedInstance] updateRecentProjects];
     }
@@ -1434,18 +1434,16 @@
 - (IBAction)showDrawer:(id)sender
 {
     if(projectTreeController == nil) {
-        projectTreeController = [[MVPProjectTreeController alloc] initWithNibName:@"MVPProjectTree" bundle:nil];
-        [projectTreeController addToSplitView:projectSplitView];
+        [self initProjectTree];
     }
-    
     [projectTreeController show];
+    [projectTreeController reload];
 }
 
 - (IBAction)toggleDrawer:(id)sender
 {
     if(projectTreeController == nil) {
-        projectTreeController = [[MVPProjectTreeController alloc] initWithNibName:@"MVPProjectTree" bundle:nil];
-        [projectTreeController addToSplitView:projectSplitView];
+        [self initProjectTree];
     }
     [projectTreeController toggle];
 }
@@ -1817,6 +1815,13 @@
         block();
 
     [afterWindowPresentedQueue release]; afterWindowPresentedQueue = nil;
+}
+
+- (void)initProjectTree {
+    if(projectTreeController == nil) {
+        projectTreeController = [[MVPProjectTreeController alloc] initWithNibName:@"MVPProjectTree" bundle:nil];
+        [projectTreeController addToSplitView:projectSplitView];
+    }
 }
 
 + (NSString *)tabBarStyleForUnified

@@ -88,10 +88,15 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 		self.rootEntry = project.rootDirEntry;
 		NSTableColumn *tableColumn = [projectOutlineView tableColumnWithIdentifier:COLUMNID_NAME];
 		[[tableColumn headerCell] setStringValue:[NSString stringWithFormat:@"%@ Project", project.name]];
-        [projectOutlineView reloadData];
-        [projectOutlineView expandItem:self.rootEntry];
+        [self reload];
         [self startWatchingProjectForChanges];
 	}
+}
+
+-(void)reload
+{
+    [projectOutlineView reloadData];
+    [projectOutlineView expandItem:self.rootEntry];
 }
 
 - (void)refreshPath:(NSString *)path
