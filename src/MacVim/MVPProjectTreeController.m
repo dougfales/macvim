@@ -201,11 +201,11 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 - (IBAction)viewLineOnGithub:(id)sender
 {
 // TODO: Implement a way to go to a certain line or selection on GH!
-//    MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
-//    MMTextView * textView = (MMTextView *)[[[vc windowController] vimView] textView];
+    MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
+    MMTextView * textView = (MMTextView *)[[[vc windowController] vimView] textView];
 //    Expose this on MMTextView somehow...
-//    int range = [[textView textViewHelper] preEditRow];
-//    NSLog(@"row is: %d", range);
+    int range = [[textView textViewHelper] preEditRow];
+    NSLog(@"row is: %d", range);
 }
 
 - (IBAction)viewOnGithub:(id)sender
@@ -334,9 +334,6 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification {
 	MVPDirEntry *dirEntry = (MVPDirEntry *) [projectOutlineView itemAtRow:[projectOutlineView selectedRow]];
-    if(dirEntry){
-        NSLog(@"hi");
-    }
 //	if([dirEntry isLeaf]) {
 //		//	[[MMAppController sharedInstance] application:NSApp openFiles:[NSArray arrayWithObject:[fsItem fullPath]]];
 //		MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
