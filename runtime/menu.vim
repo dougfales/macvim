@@ -979,6 +979,13 @@ noremenu  <script> <silent> 1.100 PopUp.Select\ &All	:<C-U>call <SID>SelectAll()
 inoremenu <script> <silent> 1.100 PopUp.Select\ &All	<C-O>:call <SID>SelectAll()<CR>
 cnoremenu <script> <silent> 1.100 PopUp.Select\ &All	<C-U>call <SID>SelectAll()<CR>
 
+if has("gui_macvim")
+  an 1.110 PopUp.-SEP3-			<Nop>
+  " This action will not work. If you open the context menu and click Add New
+  " Tab, nothing happens because the action is overwitten by 
+  an 1.110 PopUp.Add\ New\ Tab	  <Nop>
+  macm PopUp.Add\ New\ Tab	  action=addNewTab:
+endif
 if has("spell")
   " Spell suggestions in the popup menu.  Note that this will slow down the
   " appearance of the menu!
