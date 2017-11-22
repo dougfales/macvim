@@ -979,6 +979,12 @@ noremenu  <script> <silent> 1.100 PopUp.Select\ &All	:<C-U>call <SID>SelectAll()
 inoremenu <script> <silent> 1.100 PopUp.Select\ &All	<C-O>:call <SID>SelectAll()<CR>
 cnoremenu <script> <silent> 1.100 PopUp.Select\ &All	<C-U>call <SID>SelectAll()<CR>
 
+if has("gui_macvim")
+  an 1.110 PopUp.-SEP3-			  <Nop>
+  an 1.115 PopUp.Show\ Line\ on\ GitHub	  <Nop>
+  macm PopUp.Show\ Line\ on\ GitHub	  action=viewLineOnGithub:
+endif
+
 if has("spell")
   " Spell suggestions in the popup menu.  Note that this will slow down the
   " appearance of the menu!
@@ -1287,6 +1293,7 @@ if has("gui_macvim")
   macm Project.Find\ in\ Project  key=<D-F>	action=findInProject:
   
   macm Project.Toggle\ Drawer			action=toggleDrawer:
+
 endif
 
 " vim: set sw=2 :
