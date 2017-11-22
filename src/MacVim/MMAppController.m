@@ -43,6 +43,7 @@
 #import "MMWindowController.h"
 #import "MMTextView.h"
 #import "Miscellaneous.h"
+#import "MVPProject.h"
 #import <unistd.h>
 #import <CoreServices/CoreServices.h>
 // Need Carbon for TIS...() functions
@@ -102,7 +103,6 @@ typedef struct
 
 
 @interface MMAppController (Private)
-- (MMVimController *)topmostVimController;
 - (int)launchVimProcessWithArguments:(NSArray *)args
                     workingDirectory:(NSString *)cwd;
 - (NSArray *)filterFilesAndNotify:(NSArray *)files;
@@ -140,6 +140,7 @@ typedef struct
 - (void)addInputSourceChangedObserver;
 - (void)removeInputSourceChangedObserver;
 - (void)inputSourceChanged:(NSNotification *)notification;
+- (NSMenu *)recentProjectsMenu;
 @end
 
 
@@ -837,6 +838,35 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     }
 }
 
+- (void)updateRecentProjects {
+    NSMenu *recentProjectsSubmenu = [self recentProjectsMenu];
+    if(recentProjectsSubmenu) {
+        NSMenuItem *clearItem = [[recentProjectsSubmenu itemWithTitle:@"Clear Menu"] retain];
+        [recentProjectsSubmenu removeAllItems];
+        
+        NSArray *recentProjects = [MVPProject recentProjects];
+        for(int i=0; i < recentProjects.count; i++) {
+            NSString *filePath = [recentProjects objectAtIndex:i];
+            NSString *prettyPath = [[filePath stringByAbbreviatingWithTildeInPath] stringByDeletingLastPathComponent];
+            NSMenuItem *item = [recentProjectsSubmenu addItemWithTitle:prettyPath action:@selector(openRecentProject:) keyEquivalent:@""];
+            [item setRepresentedObject:filePath];
+        }
+        [recentProjectsSubmenu addItem:[NSMenuItem separatorItem]];
+        [recentProjectsSubmenu addItem:clearItem];
+    }
+}
+
+- (void)clearRecentProjects {
+    NSMenu *recentProjectsSubmenu = [self recentProjectsMenu];
+    if(recentProjectsSubmenu) {
+        NSMenuItem *clearItem = [[recentProjectsSubmenu itemWithTitle:@"Clear Menu"] retain];
+        [recentProjectsSubmenu removeAllItems];
+        [recentProjectsSubmenu addItem:[NSMenuItem separatorItem]];
+        [recentProjectsSubmenu addItem:clearItem];
+    }
+    [MVPProject clearRecentProjects];
+}
+
 - (void)setMainMenu:(NSMenu *)mainMenu
 {
     if ([NSApp mainMenu] == mainMenu) return;
@@ -898,6 +928,9 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
         }
     }
     [NSApp setWindowsMenu:windowsMenu];
+    
+    [self updateRecentProjects];
+    
 }
 
 - (NSArray *)filterOpenFiles:(NSArray *)filenames
@@ -921,6 +954,27 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 
     filenames = normalizeFilenames(filenames);
 
+    // Extract project file types
+    NSMutableArray *projectFiles = [NSMutableArray array];
+    for(NSString *f in filenames) {
+      if ([[f pathExtension] isEqualToString:@"mvp"]) {
+        NSLog(@"opening project file... %@!", f);
+        [projectFiles addObject:f];
+        [arguments setObject:[NSArray array] forKey:@"filenames"];
+        [arguments setObject:f forKey:@"macproject"];
+        [self openVimControllerWithArguments:arguments];
+      }
+    }
+    
+    if([projectFiles count] > 0) {
+      filenames = [NSMutableArray arrayWithArray:filenames];
+      [(NSMutableArray*)filenames removeObjectsInArray:projectFiles];
+    }
+    
+    if([filenames count] == 0) {
+      return YES;
+    }
+	
     //
     // a) Filter out any already open files
     //
@@ -988,8 +1042,8 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
                 noteNewRecentFilePaths:filenames];
     }
 
-    if ([filenames count] == 0)
-        return YES; // No files left to open (all were already open)
+    if ([filenames count] == 0 && [projectFiles count] == 0)
+        return YES; // No files left to open (all were already open) and no projects in the list
 
     //
     // b) Open any remaining files
@@ -1050,6 +1104,41 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 
     return openOk;
 }
+
+- (MMVimController *)topmostVimController
+{
+    // Find the topmost visible window which has an associated vim controller
+    // as follows:
+    //
+    // 1. Search through ordered windows as determined by NSApp.  Unfortunately
+    //    this method can fail, e.g. if a full-screen window is on another
+    //    "Space" (in this case NSApp returns no windows at all), so we have to
+    //    fall back on ...
+    // 2. Search through all Vim controllers and return the first visible
+    //    window.
+    
+    NSEnumerator *e = [[NSApp orderedWindows] objectEnumerator];
+    id window;
+    while ((window = [e nextObject]) && [window isVisible]) {
+        unsigned i, count = [vimControllers count];
+        for (i = 0; i < count; ++i) {
+            MMVimController *vc = [vimControllers objectAtIndex:i];
+            if ([[[vc windowController] window] isEqual:window])
+                return vc;
+        }
+    }
+    
+    unsigned i, count = [vimControllers count];
+    for (i = 0; i < count; ++i) {
+        MMVimController *vc = [vimControllers objectAtIndex:i];
+        if ([[[vc windowController] window] isVisible]) {
+            return vc;
+        }
+    }
+    
+    return nil;
+}
+
 
 - (IBAction)newWindow:(id)sender
 {
@@ -1471,40 +1560,6 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 
 
 @implementation MMAppController (Private)
-
-- (MMVimController *)topmostVimController
-{
-    // Find the topmost visible window which has an associated vim controller
-    // as follows:
-    //
-    // 1. Search through ordered windows as determined by NSApp.  Unfortunately
-    //    this method can fail, e.g. if a full-screen window is on another
-    //    "Space" (in this case NSApp returns no windows at all), so we have to
-    //    fall back on ...
-    // 2. Search through all Vim controllers and return the first visible
-    //    window.
-
-    NSEnumerator *e = [[NSApp orderedWindows] objectEnumerator];
-    id window;
-    while ((window = [e nextObject]) && [window isVisible]) {
-        unsigned i, count = [vimControllers count];
-        for (i = 0; i < count; ++i) {
-            MMVimController *vc = [vimControllers objectAtIndex:i];
-            if ([[[vc windowController] window] isEqual:window])
-                return vc;
-        }
-    }
-
-    unsigned i, count = [vimControllers count];
-    for (i = 0; i < count; ++i) {
-        MMVimController *vc = [vimControllers objectAtIndex:i];
-        if ([[[vc windowController] window] isVisible]) {
-            return vc;
-        }
-    }
-
-    return nil;
-}
 
 - (int)launchVimProcessWithArguments:(NSArray *)args
                     workingDirectory:(NSString *)cwd
@@ -2052,15 +2107,26 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 - (BOOL)openVimControllerWithArguments:(NSDictionary *)arguments
 {
     MMVimController *vc = [self takeVimControllerFromCache];
+    MVPProject *project;
+    if ([arguments objectForKey:@"macproject"]) {
+      project = [MVPProject loadFromDisk:[arguments objectForKey:@"macproject"]];
+    }
     if (vc) {
         // Open files in a new window using a cached vim controller.  This
         // requires virtually no loading time so the new window will pop up
         // instantaneously.
-        [vc passArguments:arguments];
+        if (project) {
+          [[vc windowController] setProject:project];
+        } else {
+          [vc passArguments:arguments];
+        }
         [[vc backendProxy] acknowledgeConnection];
     } else {
         NSArray *cmdline = nil;
         NSString *cwd = [self workingDirectoryForArguments:arguments];
+        if(project) {
+          cwd = [project pathToRoot];
+        }
         arguments = [self convertVimControllerArguments:arguments
                                           toCommandLine:&cmdline];
         int pid = [self launchVimProcessWithArguments:cmdline
@@ -2364,8 +2430,9 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     NSArray *filenames = [args objectForKey:@"filenames"];
     int numFiles = filenames ? [filenames count] : 0;
     BOOL openFiles = ![[args objectForKey:@"dontOpen"] boolValue];
+    BOOL hasMacProject = [args objectForKey:@"macproject"];
 
-    if (numFiles <= 0 || !openFiles)
+    if ((numFiles <= 0 || !openFiles) && !hasMacProject)
         return args;
 
     NSMutableArray *a = [NSMutableArray array];
@@ -2398,6 +2465,14 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
         }
 
         [d removeObjectForKey:@"cursorLine"];
+    }
+
+    // Open a project in MacVim after launch
+    NSString *projectPath = [args objectForKey:@"macproject"];
+    if (projectPath && [projectPath length] > 0) {
+        [a addObject:@"-c"];
+        [a addObject:[NSString stringWithFormat:@":macproject %@", projectPath]];
+        [d removeObjectForKey:@"macproject"];
     }
 
     // Set selection using normal mode commands.
@@ -2517,5 +2592,18 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
         [tv checkImState];
     }
 }
+    
+    
+    - (NSMenu *)recentProjectsMenu {
+        NSMenu *recentProjectsSubmenu = nil;
+        NSMenu *projectsMenu = [[NSApp mainMenu] findProjectsMenu];
+        if(projectsMenu) {
+            NSMenuItem *recentProjectsMenuItem = [projectsMenu itemWithTitle:@"Recent Projects"];
+            recentProjectsSubmenu = [recentProjectsMenuItem submenu];
+        }
+        return recentProjectsSubmenu;
+    }
+    
+
 
 @end // MMAppController (Private)

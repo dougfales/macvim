@@ -16,8 +16,13 @@
 @class MMFullScreenWindow;
 @class MMVimController;
 @class MMVimView;
+@class MVPProjectTreeController;
+@class MVPFastFindController;
+@class MVPNewProjectController;
+@class MVPFindInProjectController;
+@class MVPProject;
 
-@interface MMWindowController : NSWindowController<NSWindowDelegate>
+@interface MMWindowController : NSWindowController<NSWindowDelegate, NSSplitViewDelegate>
 {
     MMVimController     *vimController;
     MMVimView           *vimView;
@@ -45,6 +50,12 @@
     BOOL                resizingDueToMove;
     int                 blurRadius;
     NSMutableArray      *afterWindowPresentedQueue;
+    NSSplitView         *projectSplitView;
+    MVPProjectTreeController *projectTreeController;
+    MVPFastFindController      *fastFindController;
+    MVPNewProjectController    *newProjectController;
+    MVPFindInProjectController *findInProjectController;
+    MVPProject				   *project;
 }
 
 - (id)initWithVimController:(MMVimController *)controller;
@@ -105,5 +116,19 @@
 - (IBAction)fontSizeDown:(id)sender;
 - (IBAction)findAndReplace:(id)sender;
 - (IBAction)zoom:(id)sender;
+
+- (IBAction)fastFind:(id)sender;
+- (IBAction)openProject:(id)sender;
+- (IBAction)openProjectAtPath:(NSString*)projectPath;
+- (IBAction)newProject:(id)sender;
+- (IBAction)toggleDrawer:(id)sender;
+- (IBAction)showDrawer:(id)sender;
+- (IBAction)findInProject:(id)sender;
+- (IBAction)viewLineOnGithub:(id)sender;
+- (IBAction)openRecentProject:(id)sender;
+- (IBAction)clearRecentProjects:(id)sender;
+
+
+@property (nonatomic, retain) MVPProject *project;
 
 @end

@@ -71,6 +71,11 @@
 #import "MMWindow.h"
 #import "MMWindowController.h"
 #import "Miscellaneous.h"
+#import "MVPProjectTreeController.h"
+#import "MVPFastFindController.h"
+#import "MVPFindInProjectController.h"
+#import "MVPProject.h"
+#import "MVPNewProjectController.h"
 #import <PSMTabBarControl/PSMTabBarControl.h>
 
 
@@ -97,6 +102,7 @@
 - (void)applicationDidChangeScreenParameters:(NSNotification *)notification;
 - (void)enterNativeFullScreen;
 - (void)processAfterWindowPresentedQueue;
+- (void)initProjectTree;
 + (NSString *)tabBarStyleForUnified;
 + (NSString *)tabBarStyleForMetal;
 @end
@@ -124,6 +130,8 @@
 
 
 @implementation MMWindowController
+
+@synthesize project;
 
 - (id)initWithVimController:(MMVimController *)controller
 {
@@ -166,12 +174,24 @@
     // on whether the tabline separator is visible or not.
     NSView *contentView = [win contentView];
     [contentView setAutoresizesSubviews:YES];
-
+    
+    projectSplitView = [[NSSplitView alloc] initWithFrame:[[win contentView] bounds]];
+    projectSplitView.delegate = self;
+    projectSplitView.vertical = YES;
+    projectSplitView.dividerStyle = NSSplitViewDividerStyleThin;
+    [projectSplitView adjustSubviews];
+    
     vimView = [[MMVimView alloc] initWithFrame:[contentView frame]
                                  vimController:vimController];
     [vimView setAutoresizingMask:NSViewNotSizable];
-    [contentView addSubview:vimView];
+    [projectSplitView setAutoresizesSubviews:NO];
+    [projectSplitView setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
+   // [projectSplitView setAutoresizingMask:NSViewNotSizable];
 
+    [projectSplitView insertArrangedSubview:vimView atIndex:0];
+
+    [contentView addSubview:projectSplitView];
+    
     [win setDelegate:self];
     [win setInitialFirstResponder:[vimView textView]];
     
@@ -602,6 +622,10 @@
                                   [self constrainContentSizeToScreenSize:[vimView desiredSize]]];
             [vimView setFrameSize:contentSize];
 
+            NSSize fullWindowSize = contentSize;
+            NSInteger sidebarWidth = (projectSplitView.frame.size.width - contentSize.width);
+            fullWindowSize.width += sidebarWidth;
+            
             if (fullScreenWindow) {
                 // NOTE! Don't mark the full-screen content view as needing an
                 // update unless absolutely necessary since when it is updated
@@ -613,8 +637,8 @@
                     [fullScreenWindow centerView];
                 }
             } else {
-                [self resizeWindowToFitContentSize:contentSize
-                                      keepOnScreen:keepOnScreen];
+                [self resizeWindowToFitContentSize:fullWindowSize
+                                   keepOnScreen:keepOnScreen];
             }
         }
 
@@ -1037,6 +1061,11 @@
     [vimController sendMessage:BackingPropertiesChangedMsgID data:nil];
 }
 
+- (BOOL)splitView:(NSSplitView *)splitView shouldAdjustSizeOfSubview:(NSView *)view
+{
+    return (view == vimView);
+}
+
 // This is not an NSWindow delegate method, our custom MMWindow class calls it
 // instead of the usual windowWillUseStandardFrame:defaultFrame:.
 - (IBAction)zoom:(id)sender
@@ -1331,6 +1360,114 @@
         afterWindowPresentedQueue = [[NSMutableArray alloc] init];
     [afterWindowPresentedQueue addObject:[block copy]];
 }
+
+
+- (void)setProject:(MVPProject *)newProject {
+    if(project != newProject) {
+        [project release];
+        project = newProject;
+        [project retain];
+    }
+    // Popup a sheet while it loads!
+    [project load];
+    [project save];
+    [self initProjectTree];
+    [projectTreeController setProject:project];
+    [self showDrawer:self];
+    [vimController addVimInput:[NSString stringWithFormat:@":cd %@<CR>", [project pathToRoot]]];
+}
+
+- (IBAction)fastFind:(id)sender {
+    if(fastFindController == nil && project != nil) {
+        fastFindController = [[[MVPFastFindController alloc] init] retain];
+        fastFindController.project = project;
+    }
+    [fastFindController show];
+    //[fastFindController.window makeKeyAndOrderFront:self];
+}
+
+- (IBAction)findInProject:(id)sender {
+    if(findInProjectController == nil && project != nil) {
+        findInProjectController = [[[MVPFindInProjectController alloc] init] retain];
+        findInProjectController.project = project;
+    }
+    [findInProjectController show];
+    //[fastFindController.window makeKeyAndOrderFront:self];
+}
+
+- (IBAction)openProjectAtPath:(NSString*)projectPath{
+    if (projectPath) {
+        MVPProject *project = [MVPProject loadFromDisk:projectPath];
+        [MVPProject noticeRecentProject:projectPath];
+        [self showDrawer:self];
+        [self setProject:project];
+    }
+}
+
+- (IBAction)openProject:(id)sender {
+    NSArray *fileTypes = [NSArray arrayWithObject:@"mvp"];
+    NSOpenPanel *panel = [NSOpenPanel openPanel];
+    panel.floatingPanel = YES;
+    panel.canChooseDirectories = NO;
+    panel.canChooseFiles = YES;
+    panel.allowedFileTypes = fileTypes;
+    panel.directoryURL = [NSURL URLWithString:NSHomeDirectory()];
+    
+    int result = [panel runModal];
+    if(result == NSModalResponseOK){
+        NSURL *url = [[panel URLs] objectAtIndex:0];
+        MVPProject *p = [MVPProject loadFromDisk:[url path]];
+        [self setProject:p];
+        [MVPProject noticeRecentProject:[url path]];
+        [[MMAppController sharedInstance] updateRecentProjects];
+    }
+}
+
+- (IBAction)newProject:(id)sender {
+    if(newProjectController == nil) {
+        newProjectController = [[[MVPNewProjectController alloc] init] retain];
+        newProjectController.windowController = self;
+    }
+    [newProjectController showNewProjectWindow];
+}
+
+- (IBAction)showDrawer:(id)sender
+{
+    if(projectTreeController == nil) {
+        [self initProjectTree];
+    }
+    [projectTreeController show];
+    [projectTreeController reload];
+}
+
+- (IBAction)toggleDrawer:(id)sender
+{
+    if(projectTreeController == nil) {
+        [self initProjectTree];
+    }
+    [projectTreeController toggle];
+}
+
+- (IBAction)viewLineOnGithub:(id)sender
+{
+    if(projectTreeController) {
+        [projectTreeController viewLineOnGithub:self];
+    }
+}
+
+- (IBAction)openRecentProject:(id)sender
+{
+    NSMenuItem *recentProjectItem = sender;
+    NSString *projectPath = [recentProjectItem representedObject];
+    [self openProjectAtPath:projectPath];
+}
+
+
+- (IBAction)clearRecentProjects:(id)sender
+{
+    [[MMAppController sharedInstance] clearRecentProjects];
+}
+
 
 @end // MMWindowController
 
@@ -1678,6 +1815,13 @@
         block();
 
     [afterWindowPresentedQueue release]; afterWindowPresentedQueue = nil;
+}
+
+- (void)initProjectTree {
+    if(projectTreeController == nil) {
+        projectTreeController = [[MVPProjectTreeController alloc] initWithNibName:@"MVPProjectTree" bundle:nil];
+        [projectTreeController addToSplitView:projectSplitView];
+    }
 }
 
 + (NSString *)tabBarStyleForUnified

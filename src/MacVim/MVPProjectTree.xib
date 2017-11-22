@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13529" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13529"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="MVPProjectTreeController">
+            <connections>
+                <outlet property="projectOutlineView" destination="5" id="14"/>
+                <outlet property="scrollView" destination="2" id="15"/>
+                <outlet property="view" destination="2" id="16"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application"/>
+        <menu id="46">
+            <items>
+                <menuItem title="Open in New Tab" id="47">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="openInNewTab:" target="-2" id="62"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Open in Vertical Split" id="60">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="openInVerticalSplit:" target="-2" id="63"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Open in Horizontal Split" id="61">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="openInHorizontalSplit:" target="-2" id="64"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Show in Finder" id="58">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="showInFinder:" target="-2" id="59"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="View on Github" id="65" userLabel="Menu Item - View on Github">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="viewOnGithub:" target="-2" id="67"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Show File Inspector" id="48">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="54"/>
+                <menuItem title="Rename" id="53">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="renameFile:" target="-2" id="68"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="Delete" id="49">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="deleteItem:" target="-2" id="70"/>
+                    </connections>
+                </menuItem>
+                <menuItem isSeparatorItem="YES" id="55"/>
+                <menuItem title="New File" id="51">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                </menuItem>
+                <menuItem title="New Folder" id="52">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                </menuItem>
+            </items>
+            <connections>
+                <outlet property="delegate" destination="-2" id="56"/>
+            </connections>
+        </menu>
+        <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="2">
+            <rect key="frame" x="0.0" y="0.0" width="240" height="135"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <clipView key="contentView" id="NoT-UA-0Bs">
+                <rect key="frame" x="1" y="23" width="238" height="111"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" headerView="6" indentationPerLevel="16" autoresizesOutlineColumn="YES" outlineTableColumn="7" id="5">
+                        <rect key="frame" x="0.0" y="0.0" width="238" height="111"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <size key="intercellSpacing" width="3" height="2"/>
+                        <color key="backgroundColor" red="0.84782608699999995" green="0.84782608699999995" blue="0.84782608699999995" alpha="1" colorSpace="calibratedRGB"/>
+                        <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
+                        <tableColumns>
+                            <tableColumn identifier="Project" width="235" minWidth="16" maxWidth="1000" id="7">
+                                <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" alignment="left" title="Project">
+                                    <font key="font" metaFont="smallSystem"/>
+                                    <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" white="0.33333298560000002" alpha="1" colorSpace="calibratedWhite"/>
+                                </tableHeaderCell>
+                                <textFieldCell key="dataCell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" alignment="left" title="Text Cell" id="10">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" red="0.27717391299999999" green="0.27717391299999999" blue="0.27717391299999999" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                                <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
+                            </tableColumn>
+                        </tableColumns>
+                        <connections>
+                            <outlet property="dataSource" destination="-2" id="44"/>
+                            <outlet property="delegate" destination="-2" id="17"/>
+                            <outlet property="menu" destination="46" id="50"/>
+                        </connections>
+                    </outlineView>
+                </subviews>
+            </clipView>
+            <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="0.084033613445378144" horizontal="YES" id="4">
+                <rect key="frame" x="1" y="119" width="238" height="15"/>
+                <autoresizingMask key="autoresizingMask"/>
+            </scroller>
+            <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="0.0085470085470085479" horizontal="NO" id="3">
+                <rect key="frame" x="224" y="17" width="15" height="102"/>
+                <autoresizingMask key="autoresizingMask"/>
+            </scroller>
+            <tableHeaderView key="headerView" id="6">
+                <rect key="frame" x="0.0" y="0.0" width="238" height="23"/>
+                <autoresizingMask key="autoresizingMask"/>
+            </tableHeaderView>
+        </scrollView>
+    </objects>
+</document>

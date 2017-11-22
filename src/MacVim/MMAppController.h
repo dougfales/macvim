@@ -25,6 +25,7 @@
     NSMenuItem          *appMenuItemTemplate;
     NSMenuItem          *recentFilesMenuItem;
     NSMutableArray      *cachedVimControllers;
+    NSMutableArray      *projectQueue;
     int                 preloadPid;
     BOOL                shouldActivateWhenNextWindowOpens;
     int                 numChildProcesses;
@@ -43,6 +44,9 @@
 - (void)setMainMenu:(NSMenu *)mainMenu;
 - (NSArray *)filterOpenFiles:(NSArray *)filenames;
 - (BOOL)openFiles:(NSArray *)filenames withArguments:(NSDictionary *)args;
+- (MMVimController *)topmostVimController;
+- (void)updateRecentProjects;
+- (void)clearRecentProjects;
 
 - (IBAction)newWindow:(id)sender;
 - (IBAction)newWindowAndActivate:(id)sender;
