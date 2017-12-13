@@ -198,14 +198,15 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     return nil;
 }
 
+
+
 - (IBAction)viewLineOnGithub:(id)sender
 {
 // TODO: Implement a way to go to a certain line or selection on GH!
     MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
     MMTextView * textView = (MMTextView *)[[[vc windowController] vimView] textView];
-//    Expose this on MMTextView somehow...
-    int range = [[textView textViewHelper] preEditRow];
-    NSLog(@"row is: %d", range);
+    self.selectedTextRow = [textView preEditRow] + 1; // 0-based rows in MMTextView
+    
 }
 
 - (IBAction)viewOnGithub:(id)sender
@@ -236,7 +237,6 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 - (void)launchGitBrowser:(NSNotification *)note
 {
     NSData *data = [[note userInfo] objectForKey:NSFileHandleNotificationDataItem];
-	// Zero length means the task has completed.
     if ([data length])
     {
 		NSString *blob = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];

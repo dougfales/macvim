@@ -400,6 +400,10 @@ defaultAdvanceForFont(NSFont *font)
     [helper setPreEditRow:row column:col];
 }
 
+- (int)preEditRow {
+    return [helper preEditRow];
+}
+
 - (void)setMouseShape:(int)shape
 {
     [helper setMouseShape:shape];

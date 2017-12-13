@@ -379,6 +379,12 @@
     return [ts maxColumns];
 }
 
+- (int)preEditRow
+{
+    return [helper preEditRow];
+}
+
+
 - (void)getMaxRows:(int*)rows columns:(int*)cols
 {
     return [(MMTextStorage*)[self textStorage] getMaxRows:rows columns:cols];

@@ -52,6 +52,7 @@
 - (void)setColumnspace:(float)newColumnspace;
 - (int)maxRows;
 - (int)maxColumns;
+- (int)preEditRow;
 - (void)getMaxRows:(int*)rows columns:(int*)cols;
 - (void)setMaxRows:(int)rows columns:(int)cols;
 - (NSRect)rectForRowsInRange:(NSRange)range;
