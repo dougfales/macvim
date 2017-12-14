@@ -141,6 +141,10 @@
 
 - (void)addChild:(MVPDirEntry *)childEntry
 {
+    // Skip .mvp project file.
+    if([childEntry.filename hasSuffix:@".mvp"]) {
+        return;
+    }
     if(children == nil) {
 		self.children = [NSMutableArray arrayWithCapacity:1];
 	}
