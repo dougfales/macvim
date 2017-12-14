@@ -28,24 +28,34 @@
 	return self;
 }
 
-- (MVPDirEntry *)refreshAtPath:(NSString *)pathToRefresh{
-    MVPDirEntry *entryToRefresh = self;
-    NSString *projectRelativePath = [pathToRefresh stringByReplacingOccurrencesOfString:self.rootDirectory withString:@""];
-    if(![projectRelativePath isEqualToString:@"/"]){
-        NSArray *pathComponents = [projectRelativePath pathComponents];
-        for (NSString *pathComponent in pathComponents) {
-            for(MVPDirEntry *subDir in [entryToRefresh children] ) {
-                if([subDir isDirectory]){
-                    if([[subDir filename] isEqualToString:pathComponent]) {
-                        entryToRefresh = subDir;
-                        break;
-                    }
+- (MVPDirEntry *)entryAtPath:(NSString *)path onlyDirectories:(BOOL)wantDir {
+    MVPDirEntry *entry = self;
+    NSString *projectRelativePath = [path stringByReplacingOccurrencesOfString:self.rootDirectory withString:@""];
+    if([projectRelativePath isEqualToString:@"/"]){
+        return entry;
+    }
+    NSArray *pathComponents = [projectRelativePath pathComponents];
+    for (NSString *pathComponent in pathComponents) {
+        for(MVPDirEntry *child in [entry children] ) {
+            if([[child filename] isEqualToString:pathComponent]) {
+                if(!wantDir || [child isDirectory]){
+                    entry = child;
+                    break;
                 }
             }
         }
     }
+    return entry;
+}
+
+- (MVPDirEntry *)refreshAtPath:(NSString *)pathToRefresh{
+    MVPDirEntry *entryToRefresh = [self entryAtPath:pathToRefresh onlyDirectories:YES];
     [entryToRefresh refreshDirectory];
     return entryToRefresh;
+}
+
+- (MVPDirEntry *)entryAtPath:(NSString *)path {
+    return [self entryAtPath:path onlyDirectories:NO];
 }
 
 - (NSArray *)directoryContents
@@ -152,6 +162,10 @@
 
 - (NSString *)filename {
 	return [url lastPathComponent];
+}
+
+- (NSString *)absolutePath {
+    return [self.rootDirectory stringByAppendingPathComponent:relativePath];
 }
 
 - (BOOL)isLeaf {

@@ -495,6 +495,12 @@
     [fullScreenWindow setRepresentedFilename:filename];
 }
 
+- (NSString *)documentFilename
+{
+    return [decoratedWindow representedFilename];
+}
+
+
 - (void)setToolbar:(NSToolbar *)theToolbar
 {
     if (theToolbar != toolbar) {

@@ -194,8 +194,12 @@ static NSString *_pathToGit;
 		self.excludePredicate = nil;	
 	}
 }
-
 - (NSURL *)githubUrlForEntry:(MVPDirEntry *)entry atBlob:(NSString *)blob
+{
+    return [self githubUrlForEntry:entry atBlob:blob forLine:-1];
+}
+
+- (NSURL *)githubUrlForEntry:(MVPDirEntry *)entry atBlob:(NSString *)blob forLine:(int)lineNum
 {
     NSString *repoPath = nil;
     
@@ -205,7 +209,11 @@ static NSString *_pathToGit;
         NSInteger dotGit = [repoPath length] - 5;
         repoPath = [repoPath substringToIndex:dotGit];
     }
-    repoPath = [repoPath stringByAppendingFormat:@"/blob/%@/%@", [blob substringToIndex:7], [entry relativePath] ];
+    repoPath = [repoPath stringByAppendingFormat:@"/blob/%@%@", [blob substringToIndex:7], [entry relativePath] ];
+    if(lineNum >= 0) {
+        NSString *lineAnchor = [NSString stringWithFormat:@"#L%d", lineNum];
+        repoPath = [repoPath stringByAppendingString:lineAnchor];
+    }
     return [[NSURL alloc] initWithString:[NSString stringWithFormat:@"https://github.com%@", repoPath]];
 }
 

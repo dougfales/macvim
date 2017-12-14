@@ -37,6 +37,7 @@
 - (NSString *)filename;
 - (void)addChild:(MVPDirEntry *)childEntry;
 - (MVPDirEntry *)refreshAtPath:(NSString *)pathToRefresh;
+- (MVPDirEntry *)entryAtPath:(NSString *)path;
 - (void)buildTree;
 #pragma mark Tree-related 
 - (BOOL)isLeaf;

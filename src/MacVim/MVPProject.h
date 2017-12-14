@@ -36,6 +36,7 @@
 - (void)save;
 - (BOOL)isGitProject;
 - (NSURL *)githubUrlForEntry:(MVPDirEntry *)entry atBlob:(NSString *)blob;
+- (NSURL *)githubUrlForEntry:(MVPDirEntry *)entry atBlob:(NSString *)blob forLine:(int)lineNum;
 
 + (MVPProject *)loadFromDisk:(NSString *)pathToProjectFile;
 + (NSString *)pathToGit;

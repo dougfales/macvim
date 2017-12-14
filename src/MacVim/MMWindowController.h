@@ -74,6 +74,7 @@
 - (void)zoomWithRows:(int)rows columns:(int)cols state:(int)state;
 - (void)setTitle:(NSString *)title;
 - (void)setDocumentFilename:(NSString *)filename;
+- (NSString *)documentFilename;
 - (void)setToolbar:(NSToolbar *)toolbar;
 - (void)createScrollbarWithIdentifier:(int32_t)ident type:(int)type;
 - (BOOL)destroyScrollbarWithIdentifier:(int32_t)ident;

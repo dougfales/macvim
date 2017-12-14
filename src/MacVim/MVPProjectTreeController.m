@@ -202,47 +202,49 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 
 - (IBAction)viewLineOnGithub:(id)sender
 {
-// TODO: Implement a way to go to a certain line or selection on GH!
     MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
     MMTextView * textView = (MMTextView *)[[[vc windowController] vimView] textView];
+    // TODO preEditRow seems to be in terms of the visible text only, not a file line offset. How do I get the actual row number from vim?
     self.selectedTextRow = [textView preEditRow] + 1; // 0-based rows in MMTextView
+    NSString *filename = [[vc windowController] documentFilename];
+    MVPDirEntry *entry = [rootEntry entryAtPath:filename];
+    [self findBlobFor:entry andDo:^(NSString *blob) {
+        NSURL *url = [self.project githubUrlForEntry:entry atBlob:blob forLine:self.selectedTextRow];
+        NSLog(@"OPening: %@", url);
+        [[NSWorkspace sharedWorkspace] openURL:url];
+    }];
+    
     
 }
 
 - (IBAction)viewOnGithub:(id)sender
 {
     self.lastClickedEntry = [projectOutlineView itemAtRow:[projectOutlineView clickedRow]];
-
-    
-    NSTask *objectHashTask = [[NSTask alloc] init];
-	[objectHashTask setCurrentDirectoryPath:[project pathToRoot]];
-    [objectHashTask setStandardOutput: [NSPipe pipe]];
-    [objectHashTask setStandardError: [objectHashTask standardOutput]];
-	
-    [objectHashTask setLaunchPath:[MVPProject pathToGit]];
-    
-	NSArray *args = [NSArray arrayWithObjects:@"log", @"-n", @"1", @"--pretty=format:%H", [self.project pathToRoot], nil];
-    [objectHashTask setArguments: args];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(launchGitBrowser:)
-												 name: NSFileHandleReadCompletionNotification
-											   object: [[objectHashTask standardOutput] fileHandleForReading]];
-    [[[objectHashTask standardOutput] fileHandleForReading] readInBackgroundAndNotify];
-    [objectHashTask launch];
-    
-    
-    
+    MVPDirEntry *entry = self.lastClickedEntry;
+    [self findBlobFor:entry andDo:^(NSString *blob) {
+        NSURL *url = [self.project githubUrlForEntry:entry atBlob:blob];
+        [[NSWorkspace sharedWorkspace] openURL:url];
+    }];
 }
 
-- (void)launchGitBrowser:(NSNotification *)note
-{
-    NSData *data = [[note userInfo] objectForKey:NSFileHandleNotificationDataItem];
-    if ([data length])
-    {
-		NSString *blob = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
-        NSURL *url = [self.project githubUrlForEntry:self.lastClickedEntry atBlob:blob];
-        [[NSWorkspace sharedWorkspace] openURL:url];
-    }
+- (void)findBlobFor:(MVPDirEntry *)entry andDo:(void (^)(NSString * blob))blobBlock {
+    NSTask *objectHashTask = [[NSTask alloc] init];
+    [objectHashTask setCurrentDirectoryPath:[project pathToRoot]];
+    [objectHashTask setStandardOutput: [NSPipe pipe]];
+    [objectHashTask setStandardError: [objectHashTask standardOutput]];
+    [objectHashTask setLaunchPath:[MVPProject pathToGit]];
+    
+    NSArray *args = [NSArray arrayWithObjects:@"log", @"-n", @"1", @"--pretty=format:%H", [entry absolutePath] , nil];
+    [objectHashTask setArguments: args];
+    objectHashTask.terminationHandler = ^(NSTask * task) {
+        NSData *data = [[task.standardOutput fileHandleForReading] readDataToEndOfFile];
+        if ([data length])
+        {
+            NSString *blob = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+            blobBlock(blob);
+        }
+    };
+    [objectHashTask launch];
 }
 
 - (IBAction)openInVerticalSplit:(id)sender {
