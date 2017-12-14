@@ -29,7 +29,6 @@
 @property (nonatomic,retain) MVPProject *project;
 @property (nonatomic,retain) MVPDirEntry *rootEntry;
 @property (nonatomic,retain) MVPDirEntry *lastClickedEntry;
-@property (nonatomic, assign) int selectedTextRow;
 
 -(void)addToSplitView:(NSSplitView *)splitView;
 -(void)show;

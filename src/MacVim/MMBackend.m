@@ -1124,8 +1124,14 @@ extern GuiFont gui_mch_retain_font(GuiFont font);
 - (void)setPreEditRow:(int)row column:(int)col
 {
     NSMutableData *data = [NSMutableData data];
-    [data appendBytes:&row length:sizeof(int)];
-    [data appendBytes:&col length:sizeof(int)];
+    long lrow = row;
+    long lcol = col;
+    long topline = curwin ? curwin->w_topline : 0;
+
+    [data appendBytes:&lrow length:sizeof(long)];
+    [data appendBytes:&lcol length:sizeof(long)];
+    [data appendBytes:&topline length:sizeof(long)];
+
     [self queueMessage:SetPreEditPositionMsgID data:data];
 }
 

@@ -692,6 +692,11 @@ KeyboardInputSourcesEqual(TISInputSourceRef a, TISInputSourceRef b)
     preEditColumn = col;
 }
 
+- (void)setTopline:(long)tl
+{
+    topline = tl;
+}
+
 - (int)preEditRow
 {
     return preEditRow;
@@ -700,6 +705,11 @@ KeyboardInputSourcesEqual(TISInputSourceRef a, TISInputSourceRef b)
 - (int)preEditColumn
 {
     return preEditColumn;
+}
+
+- (long)lineNumber
+{
+    return topline + (long)preEditRow;
 }
 
 - (void)setImRange:(NSRange)range

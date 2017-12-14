@@ -400,8 +400,17 @@ defaultAdvanceForFont(NSFont *font)
     [helper setPreEditRow:row column:col];
 }
 
+- (void)setTopline:(long)tl
+{
+    [helper setTopline:tl];
+}
+
 - (int)preEditRow {
     return [helper preEditRow];
+}
+
+- (long)lineNumber {
+    return [helper lineNumber];
 }
 
 - (void)setMouseShape:(int)shape

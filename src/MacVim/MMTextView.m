@@ -140,6 +140,16 @@
     [helper setPreEditRow:row column:col];
 }
 
+- (void)setTopline:(long)topline
+{
+    [helper setTopline:topline];
+}
+
+- (long)lineNumber
+{
+    return [helper lineNumber];
+}
+
 #define MM_DEBUG_DRAWING 0
 
 - (void)performBatchDrawWithData:(NSData *)data

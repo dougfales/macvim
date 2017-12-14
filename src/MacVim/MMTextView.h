@@ -31,6 +31,8 @@
 - (id)initWithFrame:(NSRect)frame;
 
 - (void)setPreEditRow:(int)row column:(int)col;
+- (void)setTopline:(long)tl;
+- (long)lineNumber;
 - (void)performBatchDrawWithData:(NSData *)data;
 - (void)setMouseShape:(int)shape;
 - (void)setAntialias:(BOOL)antialias;

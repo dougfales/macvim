@@ -794,9 +794,10 @@ static BOOL isUnsafeMessage(int msgid);
         [windowController setBufferModified:(state > 0)];
         hasModifiedBuffer = (state != 0);
     } else if (SetPreEditPositionMsgID == msgid) {
-        const int *dim = (const int*)[data bytes];
-        [[[windowController vimView] textView] setPreEditRow:dim[0]
-                                                      column:dim[1]];
+        const long *dim = (const long*)[data bytes];
+        [[[windowController vimView] textView] setPreEditRow:(int)dim[0]
+                                                      column:(int)dim[1]];
+        [[[windowController vimView] textView] setTopline:dim[2]];
     } else if (EnableAntialiasMsgID == msgid) {
         [[[windowController vimView] textView] setAntialias:YES];
     } else if (DisableAntialiasMsgID == msgid) {

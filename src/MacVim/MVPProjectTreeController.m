@@ -198,23 +198,17 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     return nil;
 }
 
-
-
 - (IBAction)viewLineOnGithub:(id)sender
 {
     MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
     MMTextView * textView = (MMTextView *)[[[vc windowController] vimView] textView];
-    // TODO preEditRow seems to be in terms of the visible text only, not a file line offset. How do I get the actual row number from vim?
-    self.selectedTextRow = [textView preEditRow] + 1; // 0-based rows in MMTextView
+    long currentFileLine = [textView lineNumber];
     NSString *filename = [[vc windowController] documentFilename];
     MVPDirEntry *entry = [rootEntry entryAtPath:filename];
     [self findBlobFor:entry andDo:^(NSString *blob) {
-        NSURL *url = [self.project githubUrlForEntry:entry atBlob:blob forLine:self.selectedTextRow];
-        NSLog(@"OPening: %@", url);
+        NSURL *url = [self.project githubUrlForEntry:entry atBlob:blob forLine:currentFileLine];
         [[NSWorkspace sharedWorkspace] openURL:url];
     }];
-    
-    
 }
 
 - (IBAction)viewOnGithub:(id)sender

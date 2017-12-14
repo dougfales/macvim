@@ -82,7 +82,9 @@
 - (void)deleteSign:(NSString *)signName;
 - (void)setShouldDrawInsertionPoint:(BOOL)on;
 - (void)setPreEditRow:(int)row column:(int)col;
+- (void)setTopline:(long)tl;
 - (int)preEditRow;
+- (long)lineNumber;
 - (void)setMouseShape:(int)shape;
 - (void)setAntialias:(BOOL)state;
 - (void)setLigatures:(BOOL)state;

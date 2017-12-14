@@ -45,6 +45,7 @@
     NSMutableAttributedString   *markedText;
     int                 preEditRow;
     int                 preEditColumn;
+    long                topline;
     BOOL                imControl;
     BOOL                imState;
     TISInputSourceRef   lastImSource;
@@ -82,8 +83,10 @@
 - (void)unmarkText;
 - (NSMutableAttributedString *)markedText;
 - (void)setPreEditRow:(int)row column:(int)col;
+- (void)setTopline:(long)tl;
 - (int)preEditRow;
 - (int)preEditColumn;
+- (long)lineNumber;
 - (void)setImRange:(NSRange)range;
 - (NSRange)imRange;
 - (void)setMarkedRange:(NSRange)range;
