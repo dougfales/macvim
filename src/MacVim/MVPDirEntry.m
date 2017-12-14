@@ -11,7 +11,7 @@
 #import "MacVim.h"
 @implementation MVPDirEntry
 
-@synthesize url, name, relativePath, rootDirectory, parentDirEntry, children, isDirectory, excludePredicate;
+@synthesize url, name, relativePath, rootDirectory, parentDirEntry, children, isDirectory, excludePredicate, currentSort;
 
 - (id)initWithURL:(NSURL *)newUrl andParent:(MVPDirEntry *)aParent andProjectRoot:(NSString *)projectRoot andExcludePredicate:(NSPredicate *)excludePaths {
 	if((self = [super init])) {
@@ -24,6 +24,7 @@
         self.name = [url lastPathComponent];
         self.relativePath = [[url path] stringByReplacingOccurrencesOfString:projectRoot withString:@""];
 		self.parentDirEntry = aParent;
+        self.currentSort = [NSSortDescriptor sortDescriptorWithKey:@"filename" ascending:YES];
 	}
 	return self;
 }
@@ -135,6 +136,7 @@
 			}
 		}
 	}
+     [self.children sortUsingDescriptors:[NSArray arrayWithObject:self.currentSort]];
 }
 
 - (void)addChild:(MVPDirEntry *)childEntry

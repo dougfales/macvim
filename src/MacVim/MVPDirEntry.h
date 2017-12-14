@@ -30,6 +30,7 @@
 @property (nonatomic, retain) NSMutableArray *children;
 @property (assign, readonly)  BOOL isDirectory;
 @property (nonatomic, retain) NSPredicate *excludePredicate;
+@property (nonatomic, retain) NSSortDescriptor *currentSort;
 
 - (id)initWithURL:(NSURL *)newUrl andParent:(MVPDirEntry *)aParent andProjectRoot:(NSString *)projectRoot andExcludePredicate:(NSPredicate*)excludePaths;
 
