@@ -93,7 +93,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 		project = newProject;
 		self.rootEntry = project.rootDirEntry;
 		NSTableColumn *tableColumn = [projectOutlineView tableColumnWithIdentifier:COLUMNID_NAME];
-		[[tableColumn headerCell] setStringValue:[NSString stringWithFormat:@"%@ Project", project.name]];
+        [[tableColumn headerCell] setStringValue:[project.pathToRoot stringByAbbreviatingWithTildeInPath]];
         [self reload];
         [self startWatchingProjectForChanges];
 	}
@@ -116,7 +116,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 - (void)buildProgressViewAndLabel
 {
     NSRect of = projectOutlineView.frame;
-    NSRect pf = NSMakeRect(0, of.size.height/2 - 20, of.size.width, 200);
+    NSRect pf = NSMakeRect(0, 20, of.size.width, 200);
     self.progressView = [[NSView alloc] initWithFrame:pf];
     
     CGFloat iWidth = 20;
@@ -137,10 +137,18 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     [_progressView addSubview:_progressLabel];
 }
 
+- (void)positionProgressView
+{
+    NSRect of = projectOutlineView.frame;
+    NSRect pf = NSMakeRect(0, 20, of.size.width, 200);
+    self.progressView.frame = pf;
+}
+
 - (void)showLoadingProject:(NSString *)projectName
 {
     
     self.progressLabel.stringValue = [NSString stringWithFormat:@"Loading %@...", projectName];
+    [self positionProgressView];
     [scrollView addSubview:self.progressView];
     projectOutlineView.hidden = YES;
 }
