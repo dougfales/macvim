@@ -139,13 +139,16 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 
 - (void)showLoadingProject:(NSString *)projectName
 {
+    
     self.progressLabel.stringValue = [NSString stringWithFormat:@"Loading %@...", projectName];
-    [projectOutlineView addSubview:self.progressView];
+    [scrollView addSubview:self.progressView];
+    projectOutlineView.hidden = YES;
 }
 
 - (void)hideLoadingProject
 {
     [self.progressView removeFromSuperview];
+    projectOutlineView.hidden = NO;
 }
 
 - (void)startWatchingProjectForChanges
