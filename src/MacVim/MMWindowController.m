@@ -1374,12 +1374,15 @@
         project = newProject;
         [project retain];
     }
+
+    [self initProjectTree];
+    [projectTreeController updateColumnHeader:[project abbreviatedRoot]];
+    
     dispatch_queue_t bg_q = dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0);
     dispatch_async(bg_q, ^{
         [project load];
         [project save];
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self initProjectTree];
             [projectTreeController setProject:project];
             [vimController addVimInput:[NSString stringWithFormat:@":cd %@<CR>", [project pathToRoot]]];
             [self showProjectTree:self];

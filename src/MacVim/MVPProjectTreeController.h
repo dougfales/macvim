@@ -44,6 +44,7 @@
 - (void)refreshPath:(NSString *)path;
 - (void)startWatchingProjectForChanges;
 - (void)stopWatchingProjectForChanges;
+- (void)updateColumnHeader:(NSString *)header;
 #pragma mark Context Menu
 - (MVPDirEntry *)clickedDirEntry;
 - (IBAction)showInFinder:(id)sender;

@@ -1139,6 +1139,13 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     return nil;
 }
 
+- (void)returnFocusToTopmostVim
+{
+    MMVimController *vc = [self topmostVimController];
+    NSWindow *win =  [[vc windowController] window];
+    MMTextView *tv = (MMTextView *)[[[vc windowController] vimView] textView];
+    [win makeFirstResponder:tv];
+}
 
 - (IBAction)newWindow:(id)sender
 {

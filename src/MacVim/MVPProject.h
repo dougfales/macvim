@@ -35,6 +35,7 @@
 - (void)load;
 - (void)save;
 - (BOOL)isGitProject;
+- (NSString *)abbreviatedRoot;
 - (NSURL *)githubUrlForEntry:(MVPDirEntry *)entry atBlob:(NSString *)blob;
 - (NSURL *)githubUrlForEntry:(MVPDirEntry *)entry atBlob:(NSString *)blob forLine:(int)lineNum;
 

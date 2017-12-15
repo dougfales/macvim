@@ -45,6 +45,7 @@
 - (NSArray *)filterOpenFiles:(NSArray *)filenames;
 - (BOOL)openFiles:(NSArray *)filenames withArguments:(NSDictionary *)args;
 - (MMVimController *)topmostVimController;
+- (void)returnFocusToTopmostVim;
 - (void)updateRecentProjects;
 - (void)clearRecentProjects;
 

@@ -86,14 +86,18 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     [self buildProgressViewAndLabel];
 }
 
+- (void)updateColumnHeader:(NSString *)header {
+    NSTableColumn *tableColumn = [projectOutlineView tableColumnWithIdentifier:COLUMNID_NAME];
+    [[tableColumn headerCell] setStringValue:header];
+}
+
 - (void)setProject:(MVPProject *)newProject {
 	if(newProject != project) {
 		[newProject retain];
 		[project release];
 		project = newProject;
 		self.rootEntry = project.rootDirEntry;
-		NSTableColumn *tableColumn = [projectOutlineView tableColumnWithIdentifier:COLUMNID_NAME];
-        [[tableColumn headerCell] setStringValue:[project.pathToRoot stringByAbbreviatingWithTildeInPath]];
+        [self updateColumnHeader:[project abbreviatedRoot]];
         [self reload];
         [self startWatchingProjectForChanges];
 	}
@@ -231,6 +235,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     MVPDirEntry *dirEntry = (MVPDirEntry *) [projectOutlineView itemAtRow:[projectOutlineView clickedRow]];
     MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
     [vc dropFiles:[NSArray arrayWithObject:[[dirEntry url] path]] forceOpen:YES];
+    [[MMAppController sharedInstance] returnFocusToTopmostVim];
 }
 
 - (void)splitOpenWithVertical:(BOOL)vertical
@@ -240,6 +245,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 	NSString *filePath = [[[dirEntry url] path] stringByEscapingSpecialFilenameCharacters];
 	NSString *cmd = [NSString stringWithFormat:@"%@ %@<CR>", (vertical ? @":vsp" : @":sp"), filePath];
 	[vc addVimInput:cmd];
+    [[MMAppController sharedInstance] returnFocusToTopmostVim];
 }
 
 - (MVPDirEntry *)clickedDirEntry
