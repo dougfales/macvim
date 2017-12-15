@@ -13,10 +13,6 @@
 #import "MVPFastFindCell.h"
 #import "MVPFastFindResult.h"
 
-@interface MVPFastFindController ()
-- (void)openEntry:(NSMetadataItem *)item;
-@end
-
 @implementation MVPFastFindController
 
 @synthesize project, query;
@@ -110,8 +106,7 @@
 }
 
 - (BOOL)tableView:(NSTableView *)aTableView shouldEditTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex {
-    NSMetadataItem *item = [query resultAtIndex:[tableView selectedRow]];
-	[self openEntry:item];
+	[self openEntryInTab:[self pathToSelectedItem]];
 	[self close];
 	return NO;
 }
@@ -121,9 +116,9 @@
 	
     if (commandSelector == @selector(insertNewline:))
     {
-		NSMetadataItem *item = [query resultAtIndex:0];
-		if(item) {
-			[self openEntry:item];
+		NSString *firstResult = [self pathAtIndex:0];
+		if(firstResult) {
+            [self openEntryInTab:firstResult];
 			result = YES;
 			[self close];
 		}
@@ -143,28 +138,36 @@
 			[self splitOpenWithVertical:NO];
 			return;
 		} else if([keyPresses compare:@"\n" options:NSCaseInsensitiveSearch range:firstChar] ==  NSOrderedSame) {
-            //TODO: new tab, right? Look at find in project for how to do it.
 			return;
 		}				  
 	} 
 	[[self nextResponder] keyDown:event];
 }
 
+- (NSString *)pathAtIndex:(NSInteger)i
+{
+    if(i >= 0 && i < query.resultCount){
+        NSMetadataItem *item = [query resultAtIndex:i];
+        return [[item valueForAttribute:NSMetadataItemPathKey] stringByEscapingSpecialFilenameCharacters];
+    }
+    return nil;
+}
+
+- (NSString *)pathToSelectedItem {
+    return [self pathAtIndex:[tableView selectedRow]];
+}
+
 - (void)splitOpenWithVertical:(BOOL)verticalSplit {
-    NSMetadataItem *item = [query resultAtIndex:[tableView selectedRow]];
     MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
-    NSString *filePath = [[item valueForAttribute:NSMetadataItemPathKey] stringByEscapingSpecialFilenameCharacters];
-    NSString *cmd = [NSString stringWithFormat:@"%@ %@<CR>", (verticalSplit ? @":vsp" : @":sp"), filePath];
+    NSString *cmd = [NSString stringWithFormat:@"%@ %@<CR>", (verticalSplit ? @":vsp" : @":sp"), [self pathToSelectedItem]];
     [vc addVimInput:cmd];
     [self close];
 }
 
-- (void)openEntry:(NSMetadataItem *)item {
-	MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
-	NSString *filePath = [[item valueForAttribute:NSMetadataItemPathKey] stringByEscapingSpecialFilenameCharacters];
-	NSString *cmd = [NSString stringWithFormat:@":vsp %@<CR>", filePath];
-	[vc addVimInput:cmd];
-    //	[vc dropFiles:[NSArray arrayWithObject:[entry.url path]] forceOpen:YES];
+- (void)openEntryInTab:(NSString *)filePath {
+    MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
+    NSString *cmd = [NSString stringWithFormat:@":tabedit %@<CR>", filePath];
+    [vc addVimInput:cmd];
 }
 
 - (NSString *)searchString {
