@@ -21,6 +21,7 @@
 @class MVPNewProjectController;
 @class MVPFindInProjectController;
 @class MVPProject;
+@class MVPPreviewView;
 
 @interface MMWindowController : NSWindowController<NSWindowDelegate, NSSplitViewDelegate>
 {
@@ -131,5 +132,6 @@
 
 
 @property (nonatomic, retain) MVPProject *project;
+@property (nonatomic, retain) MVPPreviewView *previewWindow;
 
 @end

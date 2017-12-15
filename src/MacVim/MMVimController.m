@@ -558,7 +558,8 @@ static BOOL isUnsafeMessage(int msgid);
             [windowController presentWindow:nil];
         }
     } else if (BatchDrawMsgID == msgid) {
-        [[[windowController vimView] textView] performBatchDrawWithData:data];
+        MMTextView *tv = (MMTextView *)[[windowController vimView] textView];
+        [tv performBatchDrawWithData:data];
     } else if (SelectTabMsgID == msgid) {
 #if 0   // NOTE: Tab selection is done inside updateTabsWithData:.
         const void *bytes = [data bytes];

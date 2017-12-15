@@ -76,6 +76,7 @@
 #import "MVPFindInProjectController.h"
 #import "MVPProject.h"
 #import "MVPNewProjectController.h"
+#import "MVPPreviewView.h"
 #import <PSMTabBarControl/PSMTabBarControl.h>
 
 
@@ -190,6 +191,12 @@
 
     [projectSplitView insertArrangedSubview:vimView atIndex:0];
 
+    NSRect vimViewRect = [[win contentView] bounds];
+    
+    self.previewWindow = [[MVPPreviewView alloc] initWithFrame:NSMakeRect(vimViewRect.origin.x, 0, 100, vimViewRect.size.height)];
+    self.previewWindow.windowController = self;
+    [projectSplitView insertArrangedSubview:self.previewWindow atIndex:1];
+    
     [contentView addSubview:projectSplitView];
     
     [win setDelegate:self];
