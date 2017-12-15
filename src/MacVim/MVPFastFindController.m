@@ -143,7 +143,7 @@
 			[self splitOpenWithVertical:NO];
 			return;
 		} else if([keyPresses compare:@"\n" options:NSCaseInsensitiveSearch range:firstChar] ==  NSOrderedSame) {
-			//
+            //TODO: new tab, right? Look at find in project for how to do it.
 			return;
 		}				  
 	} 
@@ -151,16 +151,15 @@
 }
 
 - (void)splitOpenWithVertical:(BOOL)verticalSplit {
-   id entry = [query resultAtIndex:[tableView selectedRow]];
-	MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];	
-	NSString *filePath = [[[entry url] path] stringByEscapingSpecialFilenameCharacters];
-	NSString *cmd = [NSString stringWithFormat:@"%@ %@<CR>", (verticalSplit ? @":vsp" : @":sp"), filePath];
-	[vc addVimInput:cmd];
-	[self close];
+    NSMetadataItem *item = [query resultAtIndex:[tableView selectedRow]];
+    MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
+    NSString *filePath = [[item valueForAttribute:NSMetadataItemPathKey] stringByEscapingSpecialFilenameCharacters];
+    NSString *cmd = [NSString stringWithFormat:@"%@ %@<CR>", (verticalSplit ? @":vsp" : @":sp"), filePath];
+    [vc addVimInput:cmd];
+    [self close];
 }
 
 - (void)openEntry:(NSMetadataItem *)item {
-	NSLog(@"selected: %@", [item valueForAttribute:NSMetadataItemFSNameKey]);
 	MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
 	NSString *filePath = [[item valueForAttribute:NSMetadataItemPathKey] stringByEscapingSpecialFilenameCharacters];
 	NSString *cmd = [NSString stringWithFormat:@":vsp %@<CR>", filePath];
