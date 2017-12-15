@@ -29,12 +29,17 @@
 @property (nonatomic,retain) MVPProject *project;
 @property (nonatomic,retain) MVPDirEntry *rootEntry;
 @property (nonatomic,retain) MVPDirEntry *lastClickedEntry;
+@property (nonatomic,retain) NSView *progressView;
+@property (nonatomic,retain) NSTextField *progressLabel;
 
--(void)addToSplitView:(NSSplitView *)splitView;
--(void)show;
--(void)hide;
+
+- (void)addToSplitView:(NSSplitView *)splitView;
+- (void)show;
+- (void)hide;
 - (void)toggle;
 - (void)reload;
+- (void)showLoadingProject:(NSString *)projectName;
+- (void)hideLoadingProject;
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification;
 - (void)refreshPath:(NSString *)path;
 - (void)startWatchingProjectForChanges;

@@ -66,6 +66,11 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 //	[projectDrawer close];
 }
 
+- (NSColor *)backgroundColor
+{
+    return [NSColor colorWithCalibratedWhite:0.95 alpha:1.0];
+}
+
 - (void)awakeFromNib {
 	folderImage = [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)] retain];
 	[folderImage setSize:NSMakeSize(16,16)];
@@ -77,7 +82,8 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 	[tableColumn setDataCell:imageAndTextCell];
     [projectOutlineView setTarget:self];
     [projectOutlineView setDoubleAction:@selector(openInNewTab:)];
-    [projectOutlineView setBackgroundColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]];
+    [projectOutlineView setBackgroundColor:[self backgroundColor]];
+    [self buildProgressViewAndLabel];
 }
 
 - (void)setProject:(MVPProject *)newProject {
@@ -104,6 +110,42 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     ASLogErr(@"path: %@", path);
     [rootEntry refreshAtPath:path];
     [projectOutlineView reloadData];
+}
+
+
+- (void)buildProgressViewAndLabel
+{
+    NSRect of = projectOutlineView.frame;
+    NSRect pf = NSMakeRect(0, of.size.height/2 - 20, of.size.width, 200);
+    self.progressView = [[NSView alloc] initWithFrame:pf];
+    
+    CGFloat iWidth = 20;
+    CGFloat iHeight = 20;
+    NSProgressIndicator *indicator = [[NSProgressIndicator alloc] initWithFrame:NSMakeRect(pf.size.width/2 - iWidth/2, pf.size.height/2, iWidth, iHeight)];
+    indicator.style = NSProgressIndicatorSpinningStyle;
+
+    [indicator startAnimation:self];
+    [_progressView addSubview:indicator];
+    self.progressLabel = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, of.size.width, 100)];
+    _progressLabel.stringValue = @"Loading...";
+    _progressLabel.alignment = NSTextAlignmentCenter;
+    _progressLabel.bezeled = NO;
+    _progressLabel.drawsBackground = NO;
+    _progressLabel.editable = NO;
+    _progressLabel.selectable = NO;
+    _progressLabel.textColor = [NSColor lightGrayColor];
+    [_progressView addSubview:_progressLabel];
+}
+
+- (void)showLoadingProject:(NSString *)projectName
+{
+    self.progressLabel.stringValue = [NSString stringWithFormat:@"Loading %@...", projectName];
+    [projectOutlineView addSubview:self.progressView];
+}
+
+- (void)hideLoadingProject
+{
+    [self.progressView removeFromSuperview];
 }
 
 - (void)startWatchingProjectForChanges

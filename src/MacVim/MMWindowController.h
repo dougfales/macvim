@@ -123,7 +123,7 @@
 - (IBAction)openProjectAtPath:(NSString*)projectPath;
 - (IBAction)newProject:(id)sender;
 - (IBAction)toggleDrawer:(id)sender;
-- (IBAction)showDrawer:(id)sender;
+- (IBAction)showProjectTree:(id)sender;
 - (IBAction)findInProject:(id)sender;
 - (IBAction)viewLineOnGithub:(id)sender;
 - (IBAction)openRecentProject:(id)sender;

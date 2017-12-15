@@ -1374,13 +1374,19 @@
         project = newProject;
         [project retain];
     }
-    // Popup a sheet while it loads!
-    [project load];
-    [project save];
-    [self initProjectTree];
-    [projectTreeController setProject:project];
-    [self showDrawer:self];
-    [vimController addVimInput:[NSString stringWithFormat:@":cd %@<CR>", [project pathToRoot]]];
+    dispatch_queue_t bg_q = dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0);
+    dispatch_async(bg_q, ^{
+        [project load];
+        [project save];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self initProjectTree];
+            [projectTreeController setProject:project];
+            [vimController addVimInput:[NSString stringWithFormat:@":cd %@<CR>", [project pathToRoot]]];
+            [self showProjectTree:self];
+            [projectTreeController hideLoadingProject];
+        });
+    });
+    [projectTreeController showLoadingProject:project.name];
 }
 
 - (IBAction)fastFind:(id)sender {
@@ -1405,7 +1411,7 @@
     if (projectPath) {
         MVPProject *project = [MVPProject loadFromDisk:projectPath];
         [MVPProject noticeRecentProject:projectPath];
-        [self showDrawer:self];
+        [self showProjectTree:self];
         [self setProject:project];
     }
 }
@@ -1437,7 +1443,7 @@
     [newProjectController showNewProjectWindow];
 }
 
-- (IBAction)showDrawer:(id)sender
+- (IBAction)showProjectTree:(id)sender
 {
     if(projectTreeController == nil) {
         [self initProjectTree];
