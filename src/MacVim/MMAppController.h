@@ -28,6 +28,7 @@
     NSMutableArray      *projectQueue;
     int                 preloadPid;
     BOOL                shouldActivateWhenNextWindowOpens;
+    BOOL                shouldShowWelcomeWhenNextWindowOpens;
     int                 numChildProcesses;
     NSMutableDictionary *inputQueues;
     int                 processingFlag;
@@ -48,6 +49,8 @@
 - (void)returnFocusToTopmostVim;
 - (void)updateRecentProjects;
 - (void)clearRecentProjects;
+- (void)openProjectAtPath:(NSString *)path;
+- (void)launchProjectWelcomeIfNecessary;
 
 - (IBAction)newWindow:(id)sender;
 - (IBAction)newWindowAndActivate:(id)sender;

@@ -44,6 +44,7 @@
 #import "MMTextView.h"
 #import "Miscellaneous.h"
 #import "MVPProject.h"
+#import "WelcomeController.h"
 #import <unistd.h>
 #import <CoreServices/CoreServices.h>
 // Need Carbon for TIS...() functions
@@ -285,6 +286,8 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
         [connection release];  connection = nil;
     }
 
+    shouldShowWelcomeWhenNextWindowOpens = YES;
+    
     return self;
 }
 
@@ -407,6 +410,16 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     [self addInputSourceChangedObserver];
 
     ASLogInfo(@"MacVim finished launching");
+}
+
+- (void)launchProjectWelcomeIfNecessary
+{
+    if (shouldShowWelcomeWhenNextWindowOpens) {
+        shouldShowWelcomeWhenNextWindowOpens = NO;
+        
+        WelcomeController *wc = [[WelcomeController alloc] init];
+        [wc show];
+    }
 }
 
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
@@ -836,6 +849,12 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
         [NSApp activateIgnoringOtherApps:YES];
         shouldActivateWhenNextWindowOpens = NO;
     }
+    
+    if (shouldShowWelcomeWhenNextWindowOpens) {
+        [[windowController window] makeKeyAndOrderFront:self];
+        [self performSelector:@selector(launchProjectWelcomeIfNecessary) withObject:nil afterDelay:0.0];
+    }
+    
 }
 
 - (void)updateRecentProjects {
@@ -866,6 +885,12 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     }
     [MVPProject clearRecentProjects];
 }
+
+- (void)openProjectAtPath:(NSString *)path
+{
+    [[[self topmostVimController] windowController] openProjectAtPath:path];
+}
+
 
 - (void)setMainMenu:(NSMenu *)mainMenu
 {
