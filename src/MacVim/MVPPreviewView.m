@@ -11,12 +11,11 @@
 @implementation MVPPreviewView
 
 - (void)drawRect:(NSRect)dirtyRect {
- 
     if(self.windowController) {
         MMTextView *tv = (MMTextView *)[[self.windowController vimView] textView];
         [tv displayRectIgnoringOpacity:dirtyRect inContext:[NSGraphicsContext currentContext]];
     }
-    
+
 }
 
 @end
