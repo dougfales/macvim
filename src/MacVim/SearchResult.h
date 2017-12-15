@@ -27,6 +27,7 @@
 
 
 - (id)initWithFile:(NSString *)file andLine:(NSInteger)lineNo andMatch:(NSString *)match andSearchText:(NSString *)searchText;
-- (NSAttributedString *)displayName;
+- (NSString *)displayName;
+- (NSAttributedString *)attributedDisplayName:(BOOL)selected;
 
 @end
