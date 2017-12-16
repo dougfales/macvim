@@ -76,6 +76,7 @@
 		9130DB1B1FE470E2004D9F58 /* MVPOutlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9130DB1A1FE470E2004D9F58 /* MVPOutlineView.m */; };
 		9130DB211FE479B0004D9F58 /* MVPWelcomeController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9130DB1F1FE479B0004D9F58 /* MVPWelcomeController.m */; };
 		9130DB221FE479B0004D9F58 /* WelcomeController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9130DB201FE479B0004D9F58 /* WelcomeController.xib */; };
+		9130DB251FE5B8BB004D9F58 /* RecentProjectCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9130DB241FE5B8BB004D9F58 /* RecentProjectCellView.m */; };
 		91CE69E71F6BFFA100762681 /* MVPDirEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE69E11F6BFFA100762681 /* MVPDirEntry.m */; };
 		91CE69E81F6BFFA100762681 /* MVPNewProjectController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE69E31F6BFFA100762681 /* MVPNewProjectController.m */; };
 		91CE69E91F6BFFA100762681 /* MVPNewProjectWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 91CE69E41F6BFFA100762681 /* MVPNewProjectWindow.xib */; };
@@ -278,6 +279,8 @@
 		9130DB1E1FE479B0004D9F58 /* MVPWelcomeController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MVPWelcomeController.h; sourceTree = "<group>"; };
 		9130DB1F1FE479B0004D9F58 /* MVPWelcomeController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MVPWelcomeController.m; sourceTree = "<group>"; };
 		9130DB201FE479B0004D9F58 /* WelcomeController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WelcomeController.xib; sourceTree = "<group>"; };
+		9130DB231FE5B8BB004D9F58 /* RecentProjectCellView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RecentProjectCellView.h; sourceTree = "<group>"; };
+		9130DB241FE5B8BB004D9F58 /* RecentProjectCellView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RecentProjectCellView.m; sourceTree = "<group>"; };
 		91CE69E01F6BFFA100762681 /* MVPDirEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVPDirEntry.h; sourceTree = "<group>"; };
 		91CE69E11F6BFFA100762681 /* MVPDirEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MVPDirEntry.m; sourceTree = "<group>"; };
 		91CE69E21F6BFFA100762681 /* MVPNewProjectController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVPNewProjectController.h; sourceTree = "<group>"; };
@@ -527,6 +530,8 @@
 				9130DB1E1FE479B0004D9F58 /* MVPWelcomeController.h */,
 				9130DB1F1FE479B0004D9F58 /* MVPWelcomeController.m */,
 				9130DB201FE479B0004D9F58 /* WelcomeController.xib */,
+				9130DB231FE5B8BB004D9F58 /* RecentProjectCellView.h */,
+				9130DB241FE5B8BB004D9F58 /* RecentProjectCellView.m */,
 			);
 			name = Welcome;
 			sourceTree = "<group>";
@@ -795,6 +800,7 @@
 				1D80FBD60CBBD3B700102A1C /* MMVimView.m in Sources */,
 				1DE9B9500D341AB8008FEDD4 /* MMWindow.m in Sources */,
 				1DE3F8EB0D50F84600052B9E /* MMPreferenceController.m in Sources */,
+				9130DB251FE5B8BB004D9F58 /* RecentProjectCellView.m in Sources */,
 				91CE6A0D1F6C008000762681 /* MVPFastFindCell.m in Sources */,
 				0395A8330D71ED7800881434 /* DBPrefsWindowController.m in Sources */,
 				91CE6A0F1F6C008000762681 /* MVPFastFindResult.m in Sources */,
