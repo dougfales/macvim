@@ -50,6 +50,7 @@
 - (void)updateRecentProjects;
 - (void)clearRecentProjects;
 - (void)openProjectAtPath:(NSString *)path;
+- (void)newProjectForTopmostVimController:(id)sender;
 - (void)launchProjectWelcomeIfNecessary;
 
 - (IBAction)newWindow:(id)sender;

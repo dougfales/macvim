@@ -74,7 +74,7 @@
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		9130DB1B1FE470E2004D9F58 /* MVPOutlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9130DB1A1FE470E2004D9F58 /* MVPOutlineView.m */; };
-		9130DB211FE479B0004D9F58 /* WelcomeController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9130DB1F1FE479B0004D9F58 /* WelcomeController.m */; };
+		9130DB211FE479B0004D9F58 /* MVPWelcomeController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9130DB1F1FE479B0004D9F58 /* MVPWelcomeController.m */; };
 		9130DB221FE479B0004D9F58 /* WelcomeController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9130DB201FE479B0004D9F58 /* WelcomeController.xib */; };
 		91CE69E71F6BFFA100762681 /* MVPDirEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE69E11F6BFFA100762681 /* MVPDirEntry.m */; };
 		91CE69E81F6BFFA100762681 /* MVPNewProjectController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE69E31F6BFFA100762681 /* MVPNewProjectController.m */; };
@@ -275,8 +275,8 @@
 		8D1107320486CEB800E47090 /* MacVim.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacVim.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9130DB191FE470E2004D9F58 /* MVPOutlineView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MVPOutlineView.h; sourceTree = "<group>"; };
 		9130DB1A1FE470E2004D9F58 /* MVPOutlineView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MVPOutlineView.m; sourceTree = "<group>"; };
-		9130DB1E1FE479B0004D9F58 /* WelcomeController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WelcomeController.h; sourceTree = "<group>"; };
-		9130DB1F1FE479B0004D9F58 /* WelcomeController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = WelcomeController.m; sourceTree = "<group>"; };
+		9130DB1E1FE479B0004D9F58 /* MVPWelcomeController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MVPWelcomeController.h; sourceTree = "<group>"; };
+		9130DB1F1FE479B0004D9F58 /* MVPWelcomeController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MVPWelcomeController.m; sourceTree = "<group>"; };
 		9130DB201FE479B0004D9F58 /* WelcomeController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WelcomeController.xib; sourceTree = "<group>"; };
 		91CE69E01F6BFFA100762681 /* MVPDirEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVPDirEntry.h; sourceTree = "<group>"; };
 		91CE69E11F6BFFA100762681 /* MVPDirEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MVPDirEntry.m; sourceTree = "<group>"; };
@@ -524,8 +524,8 @@
 		9130DB1D1FE47983004D9F58 /* Welcome */ = {
 			isa = PBXGroup;
 			children = (
-				9130DB1E1FE479B0004D9F58 /* WelcomeController.h */,
-				9130DB1F1FE479B0004D9F58 /* WelcomeController.m */,
+				9130DB1E1FE479B0004D9F58 /* MVPWelcomeController.h */,
+				9130DB1F1FE479B0004D9F58 /* MVPWelcomeController.m */,
 				9130DB201FE479B0004D9F58 /* WelcomeController.xib */,
 			);
 			name = Welcome;
@@ -784,7 +784,7 @@
 				1D1474AA0C5677450038FA2B /* MMTextStorage.m in Sources */,
 				1D1474B00C5678370038FA2B /* MMTextView.m in Sources */,
 				1D1474B60C56796D0038FA2B /* MMVimController.m in Sources */,
-				9130DB211FE479B0004D9F58 /* WelcomeController.m in Sources */,
+				9130DB211FE479B0004D9F58 /* MVPWelcomeController.m in Sources */,
 				1D1474BC0C567A910038FA2B /* MMWindowController.m in Sources */,
 				91CE6A1B1F6C00CB00762681 /* MVPFindInProjectController.m in Sources */,
 				91CE6A031F6C005300762681 /* MVPProjectTreeCell.m in Sources */,

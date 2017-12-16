@@ -44,7 +44,7 @@
 #import "MMTextView.h"
 #import "Miscellaneous.h"
 #import "MVPProject.h"
-#import "WelcomeController.h"
+#import "MVPWelcomeController.h"
 #import <unistd.h>
 #import <CoreServices/CoreServices.h>
 // Need Carbon for TIS...() functions
@@ -417,7 +417,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     if (shouldShowWelcomeWhenNextWindowOpens) {
         shouldShowWelcomeWhenNextWindowOpens = NO;
         
-        WelcomeController *wc = [[WelcomeController alloc] init];
+        MVPWelcomeController *wc = [[MVPWelcomeController alloc] init];
         [wc show];
     }
 }
@@ -891,6 +891,10 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     [[[self topmostVimController] windowController] openProjectAtPath:path];
 }
 
+- (void)newProjectForTopmostVimController:(id)sender
+{
+    [[[self topmostVimController] windowController] newProject:sender];
+}
 
 - (void)setMainMenu:(NSMenu *)mainMenu
 {
