@@ -25,6 +25,7 @@
                                                  name:nil
                                                object:self.query];
     
+    
     NSSortDescriptor *byName = [[NSSortDescriptor alloc]
                                 initWithKey:(id)kMDItemFSName
                                 ascending:YES];
@@ -83,19 +84,22 @@
 
 - (void)doSearch {
     NSString *searchString = [searchField stringValue];
-    NSUInteger options = (NSCaseInsensitivePredicateOption|NSDiacriticInsensitivePredicateOption);
-    searchString = [NSString stringWithFormat:@"%@*", searchString];
-    NSPredicate *predicateToRun = [NSComparisonPredicate
-                             predicateWithLeftExpression:[NSExpression expressionForKeyPath:@"*"]
-                             rightExpression:[NSExpression expressionForConstantValue:searchString]
-                             modifier:NSDirectPredicateModifier
-                             type:NSLikePredicateOperatorType
-                             options:options];
+    // https://developer.apple.com/library/content/documentation/FileManagement/Conceptual/understanding_utis/understand_utis_conc/understand_utis_conc.html#//apple_ref/doc/uid/TP40001319-CH202-CHDHIJDE
+    searchString = [NSString stringWithFormat:@"*%@*", searchString];
+    NSPredicate *predicateToRun = [NSPredicate predicateWithFormat:@"%K LIKE %@ AND %K != %@ AND %K != %@",
+                                   kMDItemDisplayName, searchString,
+                                   kMDItemContentTypeTree, @"public.object-code",
+                                   kMDItemContentTypeTree, @"public.image"];
+
+    
     [self.query setPredicate:predicateToRun];
     [self.query startQuery];
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView {
+    if([[searchField stringValue] length] == 0){
+        return 0;
+    }
 	return [query resultCount];
 }
 
@@ -125,6 +129,11 @@
     }
 	
 	return result;
+}
+
+- (void)windowDidResignKey:(NSNotification *)notification
+{
+    [self close];
 }
 
 - ( void ) keyDown: ( NSEvent * ) event {
@@ -175,8 +184,10 @@
 }
 
 - (void)show {
+    [self.window center];
 	[self.window makeKeyAndOrderFront:self];
-	[self.window makeFirstResponder:searchField];
+    [self.window makeFirstResponder:searchField];
+    [tableView reloadData];
 }
 
 @end
