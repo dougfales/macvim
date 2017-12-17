@@ -1397,8 +1397,8 @@
         fastFindController = [[[MVPFastFindController alloc] init] retain];
         fastFindController.project = project;
     }
+
     [fastFindController show];
-    //[fastFindController.window makeKeyAndOrderFront:self];
 }
 
 - (IBAction)findInProject:(id)sender {
@@ -1407,7 +1407,6 @@
         findInProjectController.project = project;
     }
     [findInProjectController show];
-    //[fastFindController.window makeKeyAndOrderFront:self];
 }
 
 - (IBAction)openProjectAtPath:(NSString*)projectPath{
