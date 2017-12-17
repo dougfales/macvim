@@ -9,4 +9,9 @@
 
 @interface RecentProjectCellView : NSTableCellView
 
+@property (assign) IBOutlet NSTextField *projectName;
+@property (assign) IBOutlet NSTextField *projectPath;
+@property (assign) IBOutlet NSTextField *projectStats;
+@property (assign) IBOutlet NSImageView *icon;
+
 @end
