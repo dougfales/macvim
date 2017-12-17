@@ -19,7 +19,6 @@
 - (id) init {
     self = [super initWithWindowNibName:@"WelcomeController"];
     self.recentProjects = [MVPProject recentProjects];
-
     return self;
 }
 
@@ -28,7 +27,6 @@
     _recentProjectsTableView.doubleAction = @selector(projectSelected:);
     _recentProjectsTableView.target = self;
     _recentProjectsTableView.rowHeight = 40;
-//    recentProjectsTableView.intercellSpacing = NSMakeSize(0,0);
     self.window.backgroundColor = [NSColor whiteColor];
     [[self.window standardWindowButton:NSWindowMiniaturizeButton] setHidden:YES];
     [[self.window standardWindowButton:NSWindowZoomButton] setHidden:YES];
