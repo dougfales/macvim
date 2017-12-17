@@ -24,7 +24,7 @@
                                              selector:@selector(queryNote:)
                                                  name:nil
                                                object:self.query];
-    
+
     
     NSSortDescriptor *byName = [[NSSortDescriptor alloc]
                                 initWithKey:(id)kMDItemFSName
@@ -83,14 +83,59 @@
 }
 
 - (void)doSearch {
+    
+    if([query isGathering]){
+        [query stopQuery];
+    }
+    
     NSString *searchString = [searchField stringValue];
+    NSComparator searchTextPositionComparator = ^(id a, id b) {
+        NSRange positionA = [a rangeOfString:searchString options:NSDiacriticInsensitiveSearch];
+        NSRange positionB = [b rangeOfString:searchString options:NSDiacriticInsensitiveSearch];
+        if(positionA.location == positionB.location) {
+            return (NSComparisonResult)NSOrderedSame;
+        } else if(positionA.location > positionB.location) {
+            return (NSComparisonResult)NSOrderedDescending;
+        } else {
+            return (NSComparisonResult)NSOrderedAscending;
+        }
+    };
+    
+    NSComparator contentTypeComparator = ^(id a, id b) {
+        NSString *sourceCode = @"public.source-code";
+        BOOL sourceA = [a containsObject:sourceCode];
+        BOOL sourceB = [b containsObject:sourceCode];
+        
+        if(sourceA && sourceB) {
+            return (NSComparisonResult) NSOrderedSame;
+        } else if(sourceA) {
+            return (NSComparisonResult) NSOrderedAscending;
+        } else if(sourceB) {
+            return (NSComparisonResult) NSOrderedDescending;
+        } else {
+            return (NSComparisonResult) NSOrderedSame;
+        }
+        
+    };
+    
     // https://developer.apple.com/library/content/documentation/FileManagement/Conceptual/understanding_utis/understand_utis_conc/understand_utis_conc.html#//apple_ref/doc/uid/TP40001319-CH202-CHDHIJDE
     searchString = [NSString stringWithFormat:@"*%@*", searchString];
+   // TODO maybe revert back to the fast version and rely on the comparator to sort
     NSPredicate *predicateToRun = [NSPredicate predicateWithFormat:@"%K LIKE %@ AND %K != %@ AND %K != %@",
                                    kMDItemDisplayName, searchString,
                                    kMDItemContentTypeTree, @"public.object-code",
                                    kMDItemContentTypeTree, @"public.image"];
 
+    NSSortDescriptor *byName = [[NSSortDescriptor alloc]
+                                initWithKey:(id)kMDItemFSName
+                                ascending:YES comparator:searchTextPositionComparator];
+
+    NSSortDescriptor *byContentType = [[NSSortDescriptor alloc]
+                                       initWithKey:(id)kMDItemContentTypeTree
+                                       ascending:YES comparator:contentTypeComparator];
+    
+    NSArray *sortDescriptors = [NSArray arrayWithObjects:byName, byContentType, nil];
+    [self.query setSortDescriptors:sortDescriptors];
     
     [self.query setPredicate:predicateToRun];
     [self.query startQuery];
