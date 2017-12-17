@@ -76,7 +76,7 @@
 -(NSAttributedString *)addFilenameAttributes:(NSString *)filename  {
 	NSDictionary *filenameAttributes = [NSDictionary dictionaryWithObjectsAndKeys:[self textColor], NSForegroundColorAttributeName, [NSFont systemFontOfSize:14], NSFontAttributeName, nil];
 	NSMutableAttributedString *aString = [[NSMutableAttributedString alloc] initWithString:filename attributes:filenameAttributes]; 
-    NSRange r =	[filename rangeOfString:[fastFindController searchString]];
+    NSRange r =	[filename rangeOfString:[fastFindController searchString] options:NSCaseInsensitiveSearch];
     [aString addAttribute:NSFontAttributeName value:[NSFont boldSystemFontOfSize:14] range:r];
     NSColor *searchStringHighlightColor = ([self isHighlighted] ? [NSColor alternateSelectedControlTextColor] : [NSColor blackColor]);
 	[aString addAttribute:NSForegroundColorAttributeName value:searchStringHighlightColor range:r];
