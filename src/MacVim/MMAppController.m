@@ -44,6 +44,7 @@
 #import "MMTextView.h"
 #import "Miscellaneous.h"
 #import "MVPProject.h"
+#import "MVPWelcomeController.h"
 #import <unistd.h>
 #import <CoreServices/CoreServices.h>
 // Need Carbon for TIS...() functions
@@ -285,6 +286,8 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
         [connection release];  connection = nil;
     }
 
+    shouldShowWelcomeWhenNextWindowOpens = YES;
+    
     return self;
 }
 
@@ -407,6 +410,16 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     [self addInputSourceChangedObserver];
 
     ASLogInfo(@"MacVim finished launching");
+}
+
+- (void)launchProjectWelcomeIfNecessary
+{
+    if (shouldShowWelcomeWhenNextWindowOpens) {
+        shouldShowWelcomeWhenNextWindowOpens = NO;
+        
+        MVPWelcomeController *wc = [[MVPWelcomeController alloc] init];
+        [wc show];
+    }
 }
 
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
@@ -836,6 +849,12 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
         [NSApp activateIgnoringOtherApps:YES];
         shouldActivateWhenNextWindowOpens = NO;
     }
+    
+    if (shouldShowWelcomeWhenNextWindowOpens) {
+        [[windowController window] makeKeyAndOrderFront:self];
+        [self performSelector:@selector(launchProjectWelcomeIfNecessary) withObject:nil afterDelay:0.0];
+    }
+    
 }
 
 - (void)updateRecentProjects {
@@ -865,6 +884,16 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
         [recentProjectsSubmenu addItem:clearItem];
     }
     [MVPProject clearRecentProjects];
+}
+
+- (void)openProjectAtPath:(NSString *)path
+{
+    [[[self topmostVimController] windowController] openProjectAtPath:path];
+}
+
+- (void)newProjectForTopmostVimController:(id)sender
+{
+    [[[self topmostVimController] windowController] newProject:sender];
 }
 
 - (void)setMainMenu:(NSMenu *)mainMenu
@@ -1139,6 +1168,13 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     return nil;
 }
 
+- (void)returnFocusToTopmostVim
+{
+    MMVimController *vc = [self topmostVimController];
+    NSWindow *win =  [[vc windowController] window];
+    MMTextView *tv = (MMTextView *)[[[vc windowController] vimView] textView];
+    [win makeFirstResponder:tv];
+}
 
 - (IBAction)newWindow:(id)sender
 {

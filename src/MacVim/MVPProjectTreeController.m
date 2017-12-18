@@ -66,6 +66,11 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 //	[projectDrawer close];
 }
 
+- (NSColor *)backgroundColor
+{
+    return [NSColor colorWithCalibratedWhite:0.95 alpha:1.0];
+}
+
 - (void)awakeFromNib {
 	folderImage = [[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFolderIcon)] retain];
 	[folderImage setSize:NSMakeSize(16,16)];
@@ -77,7 +82,13 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 	[tableColumn setDataCell:imageAndTextCell];
     [projectOutlineView setTarget:self];
     [projectOutlineView setDoubleAction:@selector(openInNewTab:)];
-    [projectOutlineView setBackgroundColor:[NSColor colorWithCalibratedWhite:0.95 alpha:1.0]];
+    [projectOutlineView setBackgroundColor:[self backgroundColor]];
+    [self buildProgressViewAndLabel];
+}
+
+- (void)updateColumnHeader:(NSString *)header {
+    NSTableColumn *tableColumn = [projectOutlineView tableColumnWithIdentifier:COLUMNID_NAME];
+    [[tableColumn headerCell] setStringValue:header];
 }
 
 - (void)setProject:(MVPProject *)newProject {
@@ -86,8 +97,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 		[project release];
 		project = newProject;
 		self.rootEntry = project.rootDirEntry;
-		NSTableColumn *tableColumn = [projectOutlineView tableColumnWithIdentifier:COLUMNID_NAME];
-		[[tableColumn headerCell] setStringValue:[NSString stringWithFormat:@"%@ Project", project.name]];
+        [self updateColumnHeader:[project abbreviatedRoot]];
         [self reload];
         [self startWatchingProjectForChanges];
 	}
@@ -104,6 +114,53 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     ASLogErr(@"path: %@", path);
     [rootEntry refreshAtPath:path];
     [projectOutlineView reloadData];
+}
+
+
+- (void)buildProgressViewAndLabel
+{
+    NSRect of = projectOutlineView.frame;
+    NSRect pf = NSMakeRect(0, 20, of.size.width, 200);
+    self.progressView = [[NSView alloc] initWithFrame:pf];
+    
+    CGFloat iWidth = 20;
+    CGFloat iHeight = 20;
+    NSProgressIndicator *indicator = [[NSProgressIndicator alloc] initWithFrame:NSMakeRect(pf.size.width/2 - iWidth/2, pf.size.height/2, iWidth, iHeight)];
+    indicator.style = NSProgressIndicatorSpinningStyle;
+
+    [indicator startAnimation:self];
+    [_progressView addSubview:indicator];
+    self.progressLabel = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, of.size.width, 100)];
+    _progressLabel.stringValue = @"Loading...";
+    _progressLabel.alignment = NSTextAlignmentCenter;
+    _progressLabel.bezeled = NO;
+    _progressLabel.drawsBackground = NO;
+    _progressLabel.editable = NO;
+    _progressLabel.selectable = NO;
+    _progressLabel.textColor = [NSColor lightGrayColor];
+    [_progressView addSubview:_progressLabel];
+}
+
+- (void)positionProgressView
+{
+    NSRect of = projectOutlineView.frame;
+    NSRect pf = NSMakeRect(0, 20, of.size.width, 200);
+    self.progressView.frame = pf;
+}
+
+- (void)showLoadingProject:(NSString *)projectName
+{
+    
+    self.progressLabel.stringValue = [NSString stringWithFormat:@"Loading %@...", projectName];
+    [self positionProgressView];
+    [scrollView addSubview:self.progressView];
+    projectOutlineView.hidden = YES;
+}
+
+- (void)hideLoadingProject
+{
+    [self.progressView removeFromSuperview];
+    projectOutlineView.hidden = NO;
 }
 
 - (void)startWatchingProjectForChanges
@@ -178,6 +235,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     MVPDirEntry *dirEntry = (MVPDirEntry *) [projectOutlineView itemAtRow:[projectOutlineView clickedRow]];
     MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
     [vc dropFiles:[NSArray arrayWithObject:[[dirEntry url] path]] forceOpen:YES];
+    [[MMAppController sharedInstance] returnFocusToTopmostVim];
 }
 
 - (void)splitOpenWithVertical:(BOOL)vertical
@@ -187,6 +245,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 	NSString *filePath = [[[dirEntry url] path] stringByEscapingSpecialFilenameCharacters];
 	NSString *cmd = [NSString stringWithFormat:@"%@ %@<CR>", (vertical ? @":vsp" : @":sp"), filePath];
 	[vc addVimInput:cmd];
+    [[MMAppController sharedInstance] returnFocusToTopmostVim];
 }
 
 - (MVPDirEntry *)clickedDirEntry

@@ -13,10 +13,6 @@
 #import "MVPFastFindCell.h"
 #import "MVPFastFindResult.h"
 
-@interface MVPFastFindController ()
-- (void)openEntry:(NSMetadataItem *)item;
-@end
-
 @implementation MVPFastFindController
 
 @synthesize project, query;
@@ -28,6 +24,7 @@
                                              selector:@selector(queryNote:)
                                                  name:nil
                                                object:self.query];
+
     
     NSSortDescriptor *byName = [[NSSortDescriptor alloc]
                                 initWithKey:(id)kMDItemFSName
@@ -86,20 +83,68 @@
 }
 
 - (void)doSearch {
+    
+    if([query isGathering]){
+        [query stopQuery];
+    }
+    
     NSString *searchString = [searchField stringValue];
-    NSUInteger options = (NSCaseInsensitivePredicateOption|NSDiacriticInsensitivePredicateOption);
-    searchString = [NSString stringWithFormat:@"%@*", searchString];
-    NSPredicate *predicateToRun = [NSComparisonPredicate
-                             predicateWithLeftExpression:[NSExpression expressionForKeyPath:@"*"]
-                             rightExpression:[NSExpression expressionForConstantValue:searchString]
-                             modifier:NSDirectPredicateModifier
-                             type:NSLikePredicateOperatorType
-                             options:options];
+    NSComparator searchTextPositionComparator = ^(id a, id b) {
+        NSRange positionA = [a rangeOfString:searchString options:NSDiacriticInsensitiveSearch];
+        NSRange positionB = [b rangeOfString:searchString options:NSDiacriticInsensitiveSearch];
+        if(positionA.location == positionB.location) {
+            return (NSComparisonResult)NSOrderedSame;
+        } else if(positionA.location > positionB.location) {
+            return (NSComparisonResult)NSOrderedDescending;
+        } else {
+            return (NSComparisonResult)NSOrderedAscending;
+        }
+    };
+    
+    NSComparator contentTypeComparator = ^(id a, id b) {
+        NSString *sourceCode = @"public.source-code";
+        BOOL sourceA = [a containsObject:sourceCode];
+        BOOL sourceB = [b containsObject:sourceCode];
+        
+        if(sourceA && sourceB) {
+            return (NSComparisonResult) NSOrderedSame;
+        } else if(sourceA) {
+            return (NSComparisonResult) NSOrderedAscending;
+        } else if(sourceB) {
+            return (NSComparisonResult) NSOrderedDescending;
+        } else {
+            return (NSComparisonResult) NSOrderedSame;
+        }
+        
+    };
+    
+    // https://developer.apple.com/library/content/documentation/FileManagement/Conceptual/understanding_utis/understand_utis_conc/understand_utis_conc.html#//apple_ref/doc/uid/TP40001319-CH202-CHDHIJDE
+    searchString = [NSString stringWithFormat:@"*%@*", searchString];
+   // TODO maybe revert back to the fast version and rely on the comparator to sort
+    NSPredicate *predicateToRun = [NSPredicate predicateWithFormat:@"%K LIKE %@ AND %K != %@ AND %K != %@",
+                                   kMDItemDisplayName, searchString,
+                                   kMDItemContentTypeTree, @"public.object-code",
+                                   kMDItemContentTypeTree, @"public.image"];
+
+    NSSortDescriptor *byName = [[NSSortDescriptor alloc]
+                                initWithKey:(id)kMDItemFSName
+                                ascending:YES comparator:searchTextPositionComparator];
+
+    NSSortDescriptor *byContentType = [[NSSortDescriptor alloc]
+                                       initWithKey:(id)kMDItemContentTypeTree
+                                       ascending:YES comparator:contentTypeComparator];
+    
+    NSArray *sortDescriptors = [NSArray arrayWithObjects:byName, byContentType, nil];
+    [self.query setSortDescriptors:sortDescriptors];
+    
     [self.query setPredicate:predicateToRun];
     [self.query startQuery];
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView {
+    if([[searchField stringValue] length] == 0){
+        return 0;
+    }
 	return [query resultCount];
 }
 
@@ -110,8 +155,7 @@
 }
 
 - (BOOL)tableView:(NSTableView *)aTableView shouldEditTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex {
-    NSMetadataItem *item = [query resultAtIndex:[tableView selectedRow]];
-	[self openEntry:item];
+	[self openEntryInTab:[self pathToSelectedItem]];
 	[self close];
 	return NO;
 }
@@ -121,15 +165,20 @@
 	
     if (commandSelector == @selector(insertNewline:))
     {
-		NSMetadataItem *item = [query resultAtIndex:0];
-		if(item) {
-			[self openEntry:item];
+		NSString *firstResult = [self pathAtIndex:0];
+		if(firstResult) {
+            [self openEntryInTab:firstResult];
 			result = YES;
 			[self close];
 		}
     }
 	
 	return result;
+}
+
+- (void)windowDidResignKey:(NSNotification *)notification
+{
+    [self close];
 }
 
 - ( void ) keyDown: ( NSEvent * ) event {
@@ -143,29 +192,36 @@
 			[self splitOpenWithVertical:NO];
 			return;
 		} else if([keyPresses compare:@"\n" options:NSCaseInsensitiveSearch range:firstChar] ==  NSOrderedSame) {
-			//
 			return;
 		}				  
 	} 
 	[[self nextResponder] keyDown:event];
 }
 
-- (void)splitOpenWithVertical:(BOOL)verticalSplit {
-   id entry = [query resultAtIndex:[tableView selectedRow]];
-	MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];	
-	NSString *filePath = [[[entry url] path] stringByEscapingSpecialFilenameCharacters];
-	NSString *cmd = [NSString stringWithFormat:@"%@ %@<CR>", (verticalSplit ? @":vsp" : @":sp"), filePath];
-	[vc addVimInput:cmd];
-	[self close];
+- (NSString *)pathAtIndex:(NSInteger)i
+{
+    if(i >= 0 && i < query.resultCount){
+        NSMetadataItem *item = [query resultAtIndex:i];
+        return [[item valueForAttribute:NSMetadataItemPathKey] stringByEscapingSpecialFilenameCharacters];
+    }
+    return nil;
 }
 
-- (void)openEntry:(NSMetadataItem *)item {
-	NSLog(@"selected: %@", [item valueForAttribute:NSMetadataItemFSNameKey]);
-	MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
-	NSString *filePath = [[item valueForAttribute:NSMetadataItemPathKey] stringByEscapingSpecialFilenameCharacters];
-	NSString *cmd = [NSString stringWithFormat:@":vsp %@<CR>", filePath];
-	[vc addVimInput:cmd];
-    //	[vc dropFiles:[NSArray arrayWithObject:[entry.url path]] forceOpen:YES];
+- (NSString *)pathToSelectedItem {
+    return [self pathAtIndex:[tableView selectedRow]];
+}
+
+- (void)splitOpenWithVertical:(BOOL)verticalSplit {
+    MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
+    NSString *cmd = [NSString stringWithFormat:@"%@ %@<CR>", (verticalSplit ? @":vsp" : @":sp"), [self pathToSelectedItem]];
+    [vc addVimInput:cmd];
+    [self close];
+}
+
+- (void)openEntryInTab:(NSString *)filePath {
+    MMVimController *vc = [[MMAppController sharedInstance] topmostVimController];
+    NSString *cmd = [NSString stringWithFormat:@":tabedit %@<CR>", filePath];
+    [vc addVimInput:cmd];
 }
 
 - (NSString *)searchString {
@@ -173,8 +229,10 @@
 }
 
 - (void)show {
+    [self.window center];
 	[self.window makeKeyAndOrderFront:self];
-	[self.window makeFirstResponder:searchField];
+    [self.window makeFirstResponder:searchField];
+    [tableView reloadData];
 }
 
 @end

@@ -28,6 +28,7 @@
     NSMutableArray      *projectQueue;
     int                 preloadPid;
     BOOL                shouldActivateWhenNextWindowOpens;
+    BOOL                shouldShowWelcomeWhenNextWindowOpens;
     int                 numChildProcesses;
     NSMutableDictionary *inputQueues;
     int                 processingFlag;
@@ -45,8 +46,12 @@
 - (NSArray *)filterOpenFiles:(NSArray *)filenames;
 - (BOOL)openFiles:(NSArray *)filenames withArguments:(NSDictionary *)args;
 - (MMVimController *)topmostVimController;
+- (void)returnFocusToTopmostVim;
 - (void)updateRecentProjects;
 - (void)clearRecentProjects;
+- (void)openProjectAtPath:(NSString *)path;
+- (void)newProjectForTopmostVimController:(id)sender;
+- (void)launchProjectWelcomeIfNecessary;
 
 - (IBAction)newWindow:(id)sender;
 - (IBAction)newWindowAndActivate:(id)sender;

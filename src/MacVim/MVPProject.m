@@ -172,8 +172,9 @@ static NSString *_pathToGit;
     }
 }
 
-
-
+- (NSString *)abbreviatedRoot {
+    return [self.pathToRoot stringByAbbreviatingWithTildeInPath];
+}
 
 #pragma mark Project File Tree
 - (void)initializeFileTree {

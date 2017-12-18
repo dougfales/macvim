@@ -40,19 +40,35 @@
 	[super dealloc];
 }
 
-- (NSAttributedString *)displayName
+- (NSColor *)textColor:(BOOL)selected {
+    return (selected ? [NSColor alternateSelectedControlTextColor] : [NSColor grayColor]);
+}
+- (NSColor *)searchTextColor:(BOOL)selected {
+    return (selected ? [NSColor alternateSelectedControlTextColor] : [NSColor blackColor]);
+}
+
+- (NSString *)displayName
 {
-	if([self.children count] == 0) {
-		NSString *fullString = [NSString stringWithFormat:@"\t%ld: %@", self.lineNumber, self.matchLine];
-		NSRange searchTextLocation = [fullString rangeOfString:self.searchText];
-		NSDictionary *matchLineAttributes = [NSDictionary dictionaryWithObjectsAndKeys:[NSColor grayColor], NSForegroundColorAttributeName, [NSFont systemFontOfSize:11], NSFontAttributeName, nil];
-		NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithString:fullString attributes:matchLineAttributes]; 
-		[str addAttribute:NSForegroundColorAttributeName value:[NSColor blackColor] range:searchTextLocation];	
-		[str addAttribute:NSFontAttributeName value:[NSFont boldSystemFontOfSize:11] range:searchTextLocation];
-		return str;
-	} else {
-        return [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@ -- %@", self.basename, self.name]];
-	}
+    if([self.children count] == 0) {
+        return [NSString stringWithFormat:@"\t%ld: %@", self.lineNumber, self.matchLine];
+    } else {
+        return [NSString stringWithFormat:@"%@ -- %@", self.basename, self.name];
+    }
+}
+
+- (NSAttributedString *)attributedDisplayName:(BOOL)selected
+{
+    NSString *str = [self displayName];
+    if([self.children count] == 0) {
+        NSRange searchTextLocation = [str rangeOfString:self.searchText];
+        NSDictionary *matchLineAttributes = [NSDictionary dictionaryWithObjectsAndKeys:[self textColor:selected], NSForegroundColorAttributeName,
+                                             [NSFont systemFontOfSize:11], NSFontAttributeName, nil];
+        NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:[self displayName] attributes:matchLineAttributes];
+        [attributedString addAttribute:NSForegroundColorAttributeName value:[self searchTextColor:selected] range:searchTextLocation];
+        [attributedString addAttribute:NSFontAttributeName value:[NSFont boldSystemFontOfSize:11] range:searchTextLocation];
+        return attributedString;
+    }
+    return [[NSAttributedString alloc] initWithString:str];
 }
 
 @synthesize children;

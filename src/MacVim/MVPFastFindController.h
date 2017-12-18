@@ -10,7 +10,7 @@
 
 @class MVPProject;
 
-@interface MVPFastFindController : NSWindowController<NSTableViewDataSource, NSTableViewDelegate, NSMetadataQueryDelegate>{
+@interface MVPFastFindController : NSWindowController<NSTableViewDataSource, NSTableViewDelegate, NSMetadataQueryDelegate, NSWindowDelegate>{
 	MVPProject *project;
 	IBOutlet NSSearchField *searchField;
 	IBOutlet NSTableView *tableView;

@@ -67,7 +67,9 @@
 }
 
 - (void)outlineView:(NSOutlineView *)outlineView willDisplayCell:(NSTextField *)cell forTableColumn:(NSTableColumn *)tableColumn item:(SearchResult *)item {
-    [cell setAttributedStringValue:[item displayName]];
+    BOOL selected = ([outlineView selectedRow] == [outlineView rowForItem:item]);
+    [cell setAttributedStringValue:[item attributedDisplayName:selected]];
+ 
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldEditTableColumn:(NSTableColumn *)tableColumn item:(SearchResult *)item 
