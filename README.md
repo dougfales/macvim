@@ -6,7 +6,8 @@ as a developer who loves MacVim and uses it everyday.
 I called these extensions macvim-project because I'm not very creative, and the
 abbreviation MVP looks cool as a prefix to the files I had to add to this fork.  
 
-Most of what I've implemented here was already available in excellent vim plugins:
+Most of what I've implemented here was already available in Vim's core 
+functionality or well known plugins:
 
 * For a project tree, I could have just used
   [NERDTree](http://www.vim.org/scripts/script.php?script_id=1658).
