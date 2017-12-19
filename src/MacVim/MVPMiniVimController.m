@@ -20,8 +20,8 @@
 
 - (void)setupWindowController
 {
-    windowController = [[MVPMiniWindowController alloc] initWithVimController:self];
-    miniWindowController = windowController;
+    miniWindowController = [[MVPMiniWindowController alloc] initWithVimController:self];
+    windowController = miniWindowController;
 }
 
 - (NSFont *)miniFont
