@@ -174,6 +174,9 @@
     } else if(commandSelector == @selector(cancelOperation:)){
         [self close];
         result = YES;
+    }  else if(commandSelector == @selector(moveDown:)){
+        [self.window makeFirstResponder:tableView];
+        result = YES;
     }
 	
 	return result;
