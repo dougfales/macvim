@@ -25,6 +25,7 @@
         self.relativePath = [[url path] stringByReplacingOccurrencesOfString:projectRoot withString:@""];
 		self.parentDirEntry = aParent;
         self.currentSort = [NSSortDescriptor sortDescriptorWithKey:@"filename" ascending:YES];
+        self.isBuilding = NO;
 	}
 	return self;
 }
@@ -121,6 +122,11 @@
 
 -(void)buildTree
 {
+    if(self.isBuilding){
+        return;
+    }
+    self.isBuilding = YES;
+
     NSArray *contents = [self directoryContents];
     if([contents count] > 0){
         self.isDir = YES;
@@ -141,7 +147,8 @@
 		}
 	}
     self.needsLoad = NO;
-     [self.children sortUsingDescriptors:[NSArray arrayWithObject:self.currentSort]];
+    [self.children sortUsingDescriptors:[NSArray arrayWithObject:self.currentSort]];
+    self.isBuilding = NO;
 }
 
 - (void)addChild:(MVPDirEntry *)childEntry

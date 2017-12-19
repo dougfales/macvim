@@ -33,6 +33,8 @@
 @property (nonatomic, retain) NSSortDescriptor *currentSort;
 @property (nonatomic, assign) BOOL isDir;
 @property (nonatomic, assign) BOOL needsLoad;
+@property (nonatomic, assign) BOOL isBuilding;
+
 
 - (id)initWithURL:(NSURL *)newUrl andParent:(MVPDirEntry *)aParent andProjectRoot:(NSString *)projectRoot andExcludePredicate:(NSPredicate*)excludePaths;
 
