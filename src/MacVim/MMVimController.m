@@ -76,6 +76,7 @@ static BOOL isUnsafeMessage(int msgid);
 
 
 @interface MMVimController (Private)
+- (void)setupWindowController;
 - (void)doProcessInputQueue:(NSArray *)queue;
 - (void)handleMessage:(int)msgid data:(NSData *)data;
 - (void)savePanelDidEnd:(NSSavePanel *)panel code:(int)code
@@ -125,8 +126,8 @@ static BOOL isUnsafeMessage(int msgid);
     // TODO: Come up with a better way of creating an identifier.
     identifier = identifierCounter++;
 
-    windowController =
-        [[MMWindowController alloc] initWithVimController:self];
+    [self setupWindowController];
+
     backendProxy = [backend retain];
     popupMenuItems = [[NSMutableArray alloc] init];
     toolbarItemDict = [[NSMutableDictionary alloc] init];
@@ -186,6 +187,12 @@ static BOOL isUnsafeMessage(int msgid);
     [creationDate release];  creationDate = nil;
 
     [super dealloc];
+}
+
+- (void)setupWindowController
+{
+    windowController =
+    [[MMWindowController alloc] initWithVimController:self];
 }
 
 - (unsigned)vimControllerId

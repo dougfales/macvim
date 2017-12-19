@@ -58,7 +58,6 @@ enum {
 - (NSUInteger)representedIndexOfTabViewItem:(NSTabViewItem *)tvi;
 - (MMScroller *)scrollbarForIdentifier:(int32_t)ident index:(unsigned *)idx;
 - (NSSize)vimViewSizeForTextViewSize:(NSSize)textViewSize;
-- (NSRect)textViewRectForVimViewSize:(NSSize)contentSize;
 - (NSTabView *)tabView;
 - (void)frameSizeMayHaveChanged;
 @end

@@ -40,6 +40,7 @@
 #import "MMAppController.h"
 #import "MMPreferenceController.h"
 #import "MMVimController.h"
+#import "MVPMiniVimController.h"
 #import "MMWindowController.h"
 #import "MMTextView.h"
 #import "Miscellaneous.h"
@@ -288,6 +289,8 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 
     shouldShowWelcomeWhenNextWindowOpens = YES;
     
+    _miniWindowVC = nil;
+    
     return self;
 }
 
@@ -422,6 +425,20 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
     }
 }
 
+- (void)createMiniWindowVC
+{
+    if(_miniWindowVC == nil){
+        // launch preview window VC
+        int pid = [self launchVimProcessWithArguments:[NSArray arrayWithObject:@"evalfunc.c"] workingDirectory:@"~"];
+        [pidArguments setObject:[NSArray arrayWithObject:@"miniwindow"]
+                             forKey:[NSNumber numberWithInt:pid]];
+    }
+}
+
+- (MMVimController *)miniWindowVC {
+    return _miniWindowVC;
+}
+
 - (BOOL)applicationShouldOpenUntitledFile:(NSApplication *)sender
 {
     NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
@@ -474,6 +491,7 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 {
     ASLogDebug(@"Opening untitled window...");
     [self newWindow:self];
+    [self createMiniWindowVC];
     return YES;
 }
 
@@ -2143,10 +2161,11 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 - (BOOL)openVimControllerWithArguments:(NSDictionary *)arguments
 {
     MMVimController *vc = [self takeVimControllerFromCache];
-    MVPProject *project;
+    MVPProject *project = nil;
     if ([arguments objectForKey:@"macproject"]) {
       project = [MVPProject loadFromDisk:[arguments objectForKey:@"macproject"]];
     }
+
     if (vc) {
         // Open files in a new window using a cached vim controller.  This
         // requires virtually no loading time so the new window will pop up
@@ -2389,6 +2408,11 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
         }
 
         if (i < count) continue;
+        
+        if(ukey == [_miniWindowVC vimControllerId]){
+            [_miniWindowVC processInputQueue:[queues objectForKey:key]]; // !exceptions
+            continue;
+        }
 
         count = [cachedVimControllers count];
         for (i = 0; i < count; ++i) {
@@ -2435,6 +2459,12 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
         [vc setIsPreloading:YES];
         [cachedVimControllers addObject:vc];
         [self scheduleVimControllerPreloadAfterDelay:1];
+    } else if (args != [NSNull null] && [args containsObject:@"miniwindow"]){
+        
+        MVPMiniVimController *miniVC = [[MVPMiniVimController alloc] initWithBackend:vc.backendProxy
+                                                                   pid:vc.pid andVimId:vc.vimControllerId];
+        _miniWindowVC = [miniVC retain];
+        [_miniWindowVC setupAsMiniVimWindow];
     } else {
         [vimControllers addObject:vc];
 

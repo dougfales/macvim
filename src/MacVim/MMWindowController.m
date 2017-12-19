@@ -181,9 +181,8 @@
     projectSplitView.dividerStyle = NSSplitViewDividerStyleThin;
     [projectSplitView adjustSubviews];
     
-    vimView = [[MMVimView alloc] initWithFrame:[contentView frame]
-                                 vimController:vimController];
-    [vimView setAutoresizingMask:NSViewNotSizable];
+    [self setupVimView:contentView];
+
     [projectSplitView setAutoresizesSubviews:NO];
     [projectSplitView setAutoresizingMask:(NSViewWidthSizable | NSViewHeightSizable)];
    // [projectSplitView setAutoresizingMask:NSViewNotSizable];
@@ -254,6 +253,13 @@
     [afterWindowPresentedQueue release];  afterWindowPresentedQueue = nil;
 
     [super dealloc];
+}
+
+- (void)setupVimView:(NSView *)contentView
+{
+    vimView = [[MMVimView alloc] initWithFrame:[contentView frame]
+                                 vimController:vimController];
+    [vimView setAutoresizingMask:NSViewNotSizable];
 }
 
 - (NSString *)description

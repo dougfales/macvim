@@ -77,6 +77,9 @@
 		9130DB211FE479B0004D9F58 /* MVPWelcomeController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9130DB1F1FE479B0004D9F58 /* MVPWelcomeController.m */; };
 		9130DB221FE479B0004D9F58 /* WelcomeController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9130DB201FE479B0004D9F58 /* WelcomeController.xib */; };
 		9130DB251FE5B8BB004D9F58 /* RecentProjectCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9130DB241FE5B8BB004D9F58 /* RecentProjectCellView.m */; };
+		9148F1AB1FE862C500B1B691 /* MVPMiniVimController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9148F1AA1FE862C500B1B691 /* MVPMiniVimController.m */; };
+		9148F1AE1FE86BA200B1B691 /* MVPMiniVimView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9148F1AD1FE86BA200B1B691 /* MVPMiniVimView.m */; };
+		91756EE01FE82ADD006321CE /* MVPMiniWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91756EDF1FE82ADD006321CE /* MVPMiniWindowController.m */; };
 		91CE69E71F6BFFA100762681 /* MVPDirEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE69E11F6BFFA100762681 /* MVPDirEntry.m */; };
 		91CE69E81F6BFFA100762681 /* MVPNewProjectController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91CE69E31F6BFFA100762681 /* MVPNewProjectController.m */; };
 		91CE69E91F6BFFA100762681 /* MVPNewProjectWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 91CE69E41F6BFFA100762681 /* MVPNewProjectWindow.xib */; };
@@ -281,6 +284,12 @@
 		9130DB201FE479B0004D9F58 /* WelcomeController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = WelcomeController.xib; sourceTree = "<group>"; };
 		9130DB231FE5B8BB004D9F58 /* RecentProjectCellView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RecentProjectCellView.h; sourceTree = "<group>"; };
 		9130DB241FE5B8BB004D9F58 /* RecentProjectCellView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RecentProjectCellView.m; sourceTree = "<group>"; };
+		9148F1A91FE862C500B1B691 /* MVPMiniVimController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MVPMiniVimController.h; sourceTree = "<group>"; };
+		9148F1AA1FE862C500B1B691 /* MVPMiniVimController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MVPMiniVimController.m; sourceTree = "<group>"; };
+		9148F1AC1FE86BA200B1B691 /* MVPMiniVimView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MVPMiniVimView.h; sourceTree = "<group>"; };
+		9148F1AD1FE86BA200B1B691 /* MVPMiniVimView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MVPMiniVimView.m; sourceTree = "<group>"; };
+		91756EDE1FE82ADD006321CE /* MVPMiniWindowController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MVPMiniWindowController.h; sourceTree = "<group>"; };
+		91756EDF1FE82ADD006321CE /* MVPMiniWindowController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MVPMiniWindowController.m; sourceTree = "<group>"; };
 		91CE69E01F6BFFA100762681 /* MVPDirEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVPDirEntry.h; sourceTree = "<group>"; };
 		91CE69E11F6BFFA100762681 /* MVPDirEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MVPDirEntry.m; sourceTree = "<group>"; };
 		91CE69E21F6BFFA100762681 /* MVPNewProjectController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MVPNewProjectController.h; sourceTree = "<group>"; };
@@ -536,6 +545,19 @@
 			name = Welcome;
 			sourceTree = "<group>";
 		};
+		91756ED41FE8285E006321CE /* Preview Window */ = {
+			isa = PBXGroup;
+			children = (
+				91756EDE1FE82ADD006321CE /* MVPMiniWindowController.h */,
+				91756EDF1FE82ADD006321CE /* MVPMiniWindowController.m */,
+				9148F1A91FE862C500B1B691 /* MVPMiniVimController.h */,
+				9148F1AA1FE862C500B1B691 /* MVPMiniVimController.m */,
+				9148F1AC1FE86BA200B1B691 /* MVPMiniVimView.h */,
+				9148F1AD1FE86BA200B1B691 /* MVPMiniVimView.m */,
+			);
+			name = "Preview Window";
+			sourceTree = "<group>";
+		};
 		9175FA0B1FBF12CA0089DD68 /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
@@ -547,6 +569,7 @@
 		91CE69DE1F6BFF7F00762681 /* MacVim Project */ = {
 			isa = PBXGroup;
 			children = (
+				91756ED41FE8285E006321CE /* Preview Window */,
 				9130DB1D1FE47983004D9F58 /* Welcome */,
 				91CE69FA1F6C000C00762681 /* Fast Find */,
 				91CE69FC1F6C001700762681 /* Find in Project */,
@@ -792,12 +815,15 @@
 				9130DB211FE479B0004D9F58 /* MVPWelcomeController.m in Sources */,
 				1D1474BC0C567A910038FA2B /* MMWindowController.m in Sources */,
 				91CE6A1B1F6C00CB00762681 /* MVPFindInProjectController.m in Sources */,
+				9148F1AB1FE862C500B1B691 /* MVPMiniVimController.m in Sources */,
 				91CE6A031F6C005300762681 /* MVPProjectTreeCell.m in Sources */,
 				1D09AB420C6A4D520045497E /* MMTypesetter.m in Sources */,
 				91CE69E71F6BFFA100762681 /* MVPDirEntry.m in Sources */,
 				1DD66ECE0C803D3600EBDAB3 /* MMApplication.m in Sources */,
 				1D80FBD40CBBD3B700102A1C /* MMFullScreenWindow.m in Sources */,
 				1D80FBD60CBBD3B700102A1C /* MMVimView.m in Sources */,
+				91756EE01FE82ADD006321CE /* MVPMiniWindowController.m in Sources */,
+				9148F1AE1FE86BA200B1B691 /* MVPMiniVimView.m in Sources */,
 				1DE9B9500D341AB8008FEDD4 /* MMWindow.m in Sources */,
 				1DE3F8EB0D50F84600052B9E /* MMPreferenceController.m in Sources */,
 				9130DB251FE5B8BB004D9F58 /* RecentProjectCellView.m in Sources */,

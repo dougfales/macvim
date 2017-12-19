@@ -57,4 +57,6 @@
 - (void)setFrameSize:(NSSize)size;
 - (void)setFrame:(NSRect)frame;
 
+- (NSRect)textViewRectForVimViewSize:(NSSize)contentSize;
+
 @end

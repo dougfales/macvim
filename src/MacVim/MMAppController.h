@@ -14,6 +14,7 @@
 
 @class MMWindowController;
 @class MMVimController;
+@class MVPMiniVimController;
 
 
 @interface MMAppController : NSObject <MMAppProtocol> {
@@ -34,6 +35,7 @@
     int                 processingFlag;
 
     FSEventStreamRef    fsEventStream;
+    MVPMiniVimController     *_miniWindowVC;
 }
 
 + (MMAppController *)sharedInstance;
@@ -52,6 +54,7 @@
 - (void)openProjectAtPath:(NSString *)path;
 - (void)newProjectForTopmostVimController:(id)sender;
 - (void)launchProjectWelcomeIfNecessary;
+- (MVPMiniVimController *)miniWindowVC;
 
 - (IBAction)newWindow:(id)sender;
 - (IBAction)newWindowAndActivate:(id)sender;
