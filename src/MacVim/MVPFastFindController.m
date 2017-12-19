@@ -121,7 +121,7 @@
     // https://developer.apple.com/library/content/documentation/FileManagement/Conceptual/understanding_utis/understand_utis_conc/understand_utis_conc.html#//apple_ref/doc/uid/TP40001319-CH202-CHDHIJDE
     searchString = [NSString stringWithFormat:@"*%@*", searchString];
    // TODO maybe revert back to the fast version and rely on the comparator to sort
-    NSPredicate *predicateToRun = [NSPredicate predicateWithFormat:@"%K LIKE %@ AND %K != %@ AND %K != %@",
+    NSPredicate *predicateToRun = [NSPredicate predicateWithFormat:@"%K LIKE[cd] %@ AND %K != %@ AND %K != %@",
                                    kMDItemDisplayName, searchString,
                                    kMDItemContentTypeTree, @"public.object-code",
                                    kMDItemContentTypeTree, @"public.image"];
