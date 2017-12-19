@@ -76,6 +76,7 @@
 - (void)show {
     [self.window makeKeyAndOrderFront:self];
     [self.window makeFirstResponder:_recentProjectsTableView];
+    [self.window center];
 }
 
 - (IBAction)newProject:(id)sender
