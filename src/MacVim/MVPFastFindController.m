@@ -171,6 +171,9 @@
 			result = YES;
 			[self close];
 		}
+    } else if(commandSelector == @selector(cancelOperation:)){
+        [self close];
+        result = YES;
     }
 	
 	return result;
@@ -178,6 +181,10 @@
 
 - (void)windowDidResignKey:(NSNotification *)notification
 {
+    [self close];
+}
+
+-(void)cancelOperation:(id)sender{
     [self close];
 }
 
@@ -193,8 +200,8 @@
 			return;
 		} else if([keyPresses compare:@"\n" options:NSCaseInsensitiveSearch range:firstChar] ==  NSOrderedSame) {
 			return;
-		}				  
-	} 
+        }
+    }
 	[[self nextResponder] keyDown:event];
 }
 
