@@ -31,6 +31,8 @@
 @property (assign, readonly)  BOOL isDirectory;
 @property (nonatomic, retain) NSPredicate *excludePredicate;
 @property (nonatomic, retain) NSSortDescriptor *currentSort;
+@property (nonatomic, assign) BOOL isDir;
+@property (nonatomic, assign) BOOL needsLoad;
 
 - (id)initWithURL:(NSURL *)newUrl andParent:(MVPDirEntry *)aParent andProjectRoot:(NSString *)projectRoot andExcludePredicate:(NSPredicate*)excludePaths;
 

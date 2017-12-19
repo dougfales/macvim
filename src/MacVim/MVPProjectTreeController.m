@@ -348,7 +348,15 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 #pragma mark NSOutlineView DataSource 
 
 - (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item {
-    return (item == nil) ? 1 : [item childCount];
+    if(item == nil) {
+        return 1;
+    }
+    
+    if([item isDir] && [item needsLoad]){
+        [item buildTree];
+    }
+    
+    return [item childCount];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item {

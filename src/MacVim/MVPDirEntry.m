@@ -122,6 +122,9 @@
 -(void)buildTree
 {
     NSArray *contents = [self directoryContents];
+    if([contents count] > 0){
+        self.isDir = YES;
+    }
     for(NSURL *file in contents) {
 		if(self.excludePredicate == nil || [self.excludePredicate evaluateWithObject:[file lastPathComponent]] == NO) {
 			MVPDirEntry *dirEntry = [[MVPDirEntry alloc] initWithURL:file
@@ -129,13 +132,15 @@
                                                       andProjectRoot:self.rootDirectory
                                                  andExcludePredicate:self.excludePredicate];
 			[self addChild:dirEntry];
-			NSNumber *isDir = nil;
-			[file getResourceValue:&isDir forKey:NSURLIsDirectoryKey error:NULL];
-			if([isDir boolValue]) {
-                [dirEntry buildTree];
-			}
+            NSNumber *isDirectory = nil;
+            [file getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL];
+            dirEntry.isDir = [isDirectory boolValue];
+            if(dirEntry.isDir) {
+                dirEntry.needsLoad = YES;
+            }
 		}
 	}
+    self.needsLoad = NO;
      [self.children sortUsingDescriptors:[NSArray arrayWithObject:self.currentSort]];
 }
 
@@ -175,8 +180,10 @@
 }
 
 - (BOOL)isLeaf {
-	return ((children == nil) || [children count] == 0);
+    return !self.isDir;
+	//return ((children == nil) || [children count] == 0);
 }
+
 - (NSInteger)childCount {
 	if(children == nil) {
 		return 0;
