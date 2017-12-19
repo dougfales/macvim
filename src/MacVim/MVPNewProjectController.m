@@ -8,6 +8,7 @@
 
 #import "MVPNewProjectController.h"
 #import "MMWindowController.h"
+#import "MMAppController.h"
 #import "MVPProject.h"
 
 @interface MVPNewProjectController ()
@@ -43,7 +44,8 @@
     NSString *projectPath = [self selectedRoot];
 	MVPProject *project = [[MVPProject alloc] initWithRoot:projectPath andName:[self selectedName] andIgnorePatterns:[self selectedIgnorePatterns]];
 	[self.windowController setProject:project];
-    [MVPProject noticeRecentProject:projectPath];
+    [MVPProject noticeRecentProject:[project pathToProjectFile]];
+    [[MMAppController sharedInstance] updateRecentProjects];
 	[self close];
 }
 

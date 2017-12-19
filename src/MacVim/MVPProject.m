@@ -218,6 +218,14 @@ static NSString *_pathToGit;
     return [[NSURL alloc] initWithString:[NSString stringWithFormat:@"https://github.com%@", repoPath]];
 }
 
+- (NSString *)pathToProjectFile
+{
+    if([[[pathToRoot lastPathComponent] pathExtension] isEqualToString:@"mvp"]) {
+        return pathToRoot;
+    }
+    return [MVPProject projectMetaPath:self.pathToRoot forProjectName:name];
+}
+
 #pragma mark Saving and Creating
 + (NSString *)projectMetaPath:(NSString *)rootPath forProjectName:(NSString *)projName {
 	return [rootPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.mvp", projName]];

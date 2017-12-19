@@ -1415,6 +1415,7 @@
         [MVPProject noticeRecentProject:projectPath];
         [self showProjectTree:self];
         [self setProject:project];
+        [[MMAppController sharedInstance] updateRecentProjects];
     }
 }
 
