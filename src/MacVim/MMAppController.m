@@ -428,8 +428,8 @@ fsEventCallback(ConstFSEventStreamRef streamRef,
 - (void)createMiniWindowVC
 {
     if(_miniWindowVC == nil){
-        // launch preview window VC
-        int pid = [self launchVimProcessWithArguments:[NSArray arrayWithObject:@"evalfunc.c"] workingDirectory:@"~"];
+        // launch preview window VC in non-modifiable mode
+        int pid = [self launchVimProcessWithArguments:[NSArray arrayWithObjects:@"-M", @"evalfunc.c", nil] workingDirectory:@"~"];
         [pidArguments setObject:[NSArray arrayWithObject:@"miniwindow"]
                              forKey:[NSNumber numberWithInt:pid]];
     }
